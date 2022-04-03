@@ -1,27 +1,21 @@
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View } from "react-native";
-import SignIn from "./src/Screens/SignIn";
-import SignUp from "./src/Screens/SignUp";
+import { StyleSheet, Text, View, LogBox } from "react-native";
+
 import { NavigationContainer, StackActions } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-
+import useAuth, { AuthProvider } from "./src/useAuth";
+import StackNavigator from "./src/StackNavigator";
+// import AppLoading from "expo-app-loading";
+// import { useFonts } from "expo-font";
+LogBox.ignoreAllLogs(); //Ignore log notfication by message
 const Stack = createNativeStackNavigator();
 
 export default function App() {
   return (
-    <NavigationContainer>
-      <Stack.Navigator>
-        <Stack.Screen
-          name="SignIn"
-          component={SignIn}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="SignUp"
-          component={SignUp}
-          options={{ headerShown: false }}
-        />
-      </Stack.Navigator>
+    <NavigationContainer screenOptions={{ headerTransparent: true }}>
+      <AuthProvider>
+        <StackNavigator />
+      </AuthProvider>
     </NavigationContainer>
   );
 }
@@ -32,5 +26,4 @@ expo init BarcodeApp
 cd BarcodeApp
 npm install @react-navigation/native @react-navigation/native-stack
 npm install react-native-screens react-native-safe-area-context
-npm start
 */

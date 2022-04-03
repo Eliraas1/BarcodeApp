@@ -7,14 +7,14 @@ import {
   TextInput,
   TouchableOpacity,
 } from "react-native";
-// import SignUp from "./SignUp";
 import { LinearGradient } from "expo-linear-gradient";
-// import { app } from "../../Firebase/firebase";
 import { Formik } from "formik";
 import schema from "../Schemes/UserScheme";
+import { app, auth } from "../../Firebase/firebase";
 
 const SignIn = ({ navigation }) => {
   const navigate = () => {
+    // console.log(auth);
     navigation.navigate("SignUp");
   };
 

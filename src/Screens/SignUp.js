@@ -8,6 +8,7 @@ import {
   TextInput,
   TouchableOpacity,
   ScrollView,
+  Alert,
 } from "react-native";
 // import SignUp from "./SignUp";
 import { LinearGradient } from "expo-linear-gradient";
@@ -15,15 +16,53 @@ import Icon from "react-native-vector-icons/Ionicons";
 // import Icon as FIcon from "react-native-vector-icons/FontAwesome";
 import { Formik } from "formik";
 import schema from "../Schemes/UserScheme";
-
-// const { schema } = schema;
+import { auth, createUserWithEmailAndPassword } from "../../Firebase/firebase";
+// import { createUserWithEmailAndPassword } from "firebase/auth";
+import ValidErrors from "../ValidErrors";
 
 const SignUp = ({ navigation }) => {
-  const [Email, setEmail] = useState(null);
-  // const [Password, setPassword] = useState(null);
+  const [email, setEmail] = useState(" ");
+  const [password, setpassword] = useState(" ");
+  const [isSignedIn, setisSignedIn] = useState(false);
+  const [error, setError] = useState(" ");
+  const [isError, setIsError] = useState(false);
+
   const navigate = () => {
     navigation.navigate("SignIn");
   };
+
+  const handleChangeEmail = (value) => {
+    setEmail(value.email);
+  };
+
+  const handleSubmit1 = (values) => {
+    console.log(values.password);
+    console.log(values.email);
+    // setpassword(toString(values.password));
+    console.log("state " + email);
+    // console.log("state" + values.email.type + " " + values.password.type);
+    // createUserWithEmailAndPassword(auth, values.email, values.password)
+    //   .then((res) => {
+    //     setisSignedIn(true);
+    //     navigate();
+    //   })
+    //   .catch((err) => {
+    //     console.log(err);
+    //     setIsError(true);
+    //     switch (err.code) {
+    //       case "auth/email-already-exists":
+    //         setError("email already in use!");
+    //         break;
+    //       case "auth/email-already-in-use":
+    //         setError("email already in use!");
+    //         break;
+    //       case "auth/invalid-email":
+    //         setError("invalid email!");
+    //         break;
+    //     }
+    //   });
+  };
+
   return (
     <LinearGradient
       colors={["#5a36db", "#3a288e", "rgb(36, 35, 34)"]}
@@ -50,9 +89,9 @@ const SignUp = ({ navigation }) => {
         <View style={styles.BottomView}>
           <Text style={styles.textStyle}>Create New Account!</Text>
           <Formik
-            initialValues={{ email: "", password: "", fullName: "" }}
+            initialValues={{ email: "", password: "", confirmpassword: "" }}
             validateOnMount={true}
-            onSubmit={(values) => console.log(values)}
+            onSubmit={handleSubmit1}
             validationSchema={schema}
           >
             {({
@@ -65,7 +104,7 @@ const SignUp = ({ navigation }) => {
               errors,
             }) => (
               <View style={styles.FormView}>
-                <TextInput
+                {/* <TextInput
                   name="fullName"
                   onChangeText={handleChange("fullName")}
                   value={values.fullName}
@@ -76,7 +115,7 @@ const SignUp = ({ navigation }) => {
                 />
                 {errors.fullName && touched.fullName && (
                   <Text style={styles.errors}>{errors.fullName}</Text>
-                )}
+                )} */}
                 <TextInput
                   name="email"
                   placeholder="Email Address*"
@@ -91,6 +130,7 @@ const SignUp = ({ navigation }) => {
                 {errors.email && touched.email && (
                   <Text style={styles.errors}>{errors.email}</Text>
                 )}
+                {isError && <ValidErrors error={error} />}
                 <TextInput
                   name="password"
                   placeholder="Password*"
@@ -105,13 +145,20 @@ const SignUp = ({ navigation }) => {
                 {errors.password && touched.password && (
                   <Text style={styles.errors}>{errors.password}</Text>
                 )}
-                {/* <TextInput
-                  placeholder="Confirm Password*"
-                  placeholderTextColor={"white"}
+                <TextInput
+                  name="confirmpassword"
+                  placeholder="confirm Password*"
                   style={styles.TextInput}
+                  onChangeText={handleChange("confirmpassword")}
+                  onBlur={handleBlur("confirmpassword")}
+                  value={values.confirmpassword}
                   secureTextEntry
+                  placeholderTextColor={"white"}
                   // textContentType="password"
-                /> */}
+                />
+                {errors.confirmpassword && (
+                  <Text style={styles.errors}>{errors.confirmpassword}</Text>
+                )}
                 <TouchableOpacity style={styles.Button} onPress={handleSubmit}>
                   <LinearGradient
                     colors={["#7045FD", "#6F45FB", "#845EEE"]}

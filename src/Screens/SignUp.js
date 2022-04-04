@@ -31,36 +31,26 @@ const SignUp = ({ navigation }) => {
     navigation.navigate("SignIn");
   };
 
-  const handleChangeEmail = (value) => {
-    setEmail(value.email);
-  };
-
   const handleSubmit1 = (values) => {
-    console.log(values.password);
-    console.log(values.email);
-    // setpassword(toString(values.password));
-    console.log("state " + email);
-    // console.log("state" + values.email.type + " " + values.password.type);
-    // createUserWithEmailAndPassword(auth, values.email, values.password)
-    //   .then((res) => {
-    //     setisSignedIn(true);
-    //     navigate();
-    //   })
-    //   .catch((err) => {
-    //     console.log(err);
-    //     setIsError(true);
-    //     switch (err.code) {
-    //       case "auth/email-already-exists":
-    //         setError("email already in use!");
-    //         break;
-    //       case "auth/email-already-in-use":
-    //         setError("email already in use!");
-    //         break;
-    //       case "auth/invalid-email":
-    //         setError("invalid email!");
-    //         break;
-    //     }
-    //   });
+    createUserWithEmailAndPassword(auth, values.email, values.password)
+      .then((res) => {
+        setisSignedIn(true);
+        navigate();
+      })
+      .catch((err) => {
+        setIsError(true);
+        switch (err.code) {
+          case "auth/email-already-exists":
+            setError("email already in use!");
+            break;
+          case "auth/email-already-in-use":
+            setError("email already in use!");
+            break;
+          case "auth/invalid-email":
+            setError("invalid email!");
+            break;
+        }
+      });
   };
 
   return (

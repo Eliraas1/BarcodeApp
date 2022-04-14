@@ -13,7 +13,7 @@ const StackNavigator = () => {
   //   const user = false;
   return (
     <Stack.Navigator screenOptions={{ headerTransparent: false }}>
-      {user ? (
+      {!user ? (
         <>
           <Stack.Screen
             name="SignIn"

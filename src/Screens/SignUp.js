@@ -28,14 +28,15 @@ const SignUp = ({ navigation }) => {
   const [isError, setIsError] = useState(false);
 
   const navigate = () => {
-    navigation.navigate("SignIn");
+    navigation.pop();
   };
 
   const handleSubmit1 = (values) => {
     createUserWithEmailAndPassword(auth, values.email, values.password)
       .then((res) => {
-        setisSignedIn(true);
-        navigate();
+        // setisSignedIn(true);
+        // console.log("first");
+        // navigate();
       })
       .catch((err) => {
         setIsError(true);

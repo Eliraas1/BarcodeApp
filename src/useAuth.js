@@ -9,7 +9,7 @@ import {
 } from "@firebase/auth";
 import { auth } from "../Firebase/firebase";
 import { createContext, useContext, useEffect } from "react";
-
+// import AsyncStorage from "@react-native-async-storage/async-storage";
 const AuthContext = createContext({});
 
 const config = {
@@ -27,7 +27,7 @@ let error;
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-
+  console.log(user);
   useEffect(() => {
     onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -48,8 +48,7 @@ export const AuthProvider = ({ children }) => {
           );
           await signInWithCredential(auth, credantial);
           console.log("Heidad!");
-        }
-        return Promise.reject();
+        } else return Promise.reject();
       })
       .catch((err) => {
         error = err;

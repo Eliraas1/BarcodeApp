@@ -13,14 +13,11 @@ import schema from "../Schemes/UserScheme";
 import ValidErrors from "../ValidErrors";
 import { auth, signInWithEmailAndPassword } from "../../Firebase/firebase";
 import useAuth from "../useAuth";
-// import {
-//   GoogleSignin,
-//   GoogleSigninButton,
-//   statusCodes,
-// } from "@react-native-google-signin/google-signin";
-
+// import { GoogleSigninButton } from "@react-native-google-signin/google-signin";
+// import GoogleButton from "react-google-button";
 //need to remove from comment!!!!!!!!@@@@@@@@@@@
 // import signInWithGoogle from "../useAuth";
+import { SocialIcon } from "react-native-elements";
 
 const SignIn = ({ navigation }) => {
   const { signInWithGoogle } = useAuth();
@@ -30,7 +27,7 @@ const SignIn = ({ navigation }) => {
   //   console.log("asd");
   // };
   const navigate = () => {
-    // console.log(auth);
+    console.log(auth);
     navigation.navigate("SignUp");
   };
 
@@ -135,7 +132,7 @@ const SignIn = ({ navigation }) => {
             style={styles.GradBtn}
             locations={[1, 0.9, 1]}
           >
-            <Text style={styles.SignUpText}>Sign Up With Google</Text>
+            <Text style={styles.SignUpText}>Sign In With Google</Text>
           </LinearGradient>
         </TouchableOpacity>
 
@@ -151,6 +148,7 @@ const SignIn = ({ navigation }) => {
           </LinearGradient>
         </TouchableOpacity>
       </View>
+      <SocialIcon type="google" />
     </View>
   );
 };

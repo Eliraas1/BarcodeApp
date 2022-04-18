@@ -5,7 +5,7 @@ import {
   GoogleAuthProvider,
   signInWithEmailAndPassword,
 } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDkE0L3ZPEzKtJ9ssNmokmVm4dv5fXeMqA",
@@ -26,11 +26,15 @@ if (getApps().length < 1) {
 }
 // const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const db = getFirestore();
+const db = getFirestore(app);
+
 export {
   auth,
   createUserWithEmailAndPassword,
   GoogleAuthProvider,
   db,
+  doc,
+  setDoc,
+  getDoc,
   signInWithEmailAndPassword,
 };

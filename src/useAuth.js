@@ -1,6 +1,6 @@
 import { View, Text } from "react-native";
-import React, { useState } from "react";
-import * as Google from "expo-google-app-auth";
+import React, { useMemo, useState } from "react";
+import { logInAsync } from "expo-google-app-auth";
 import {
   onAuthStateChanged,
   GoogleAuthProvider,
@@ -11,6 +11,7 @@ import { auth } from "../Firebase/firebase";
 import { createContext, useContext, useEffect } from "react";
 // import AsyncStorage from "@react-native-async-storage/async-storage";
 const AuthContext = createContext({});
+// import Loading from "./Loading";
 
 const config = {
   androidClientId:
@@ -21,24 +22,40 @@ const config = {
   permissions: ["public_profile", "email", "gender", "location"],
 };
 
-let error;
+// let error;
 
 // export default signInWithGoogle;
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [loadingInitial, setLoadingInitial] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   console.log(user);
-  useEffect(() => {
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setUser(user);
-      } else {
-        setUser(null);
-      }
-    });
-  }, []);
+
+  useEffect(
+    () =>
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          setUser(user);
+        } else {
+          setUser(null);
+        }
+        setLoadingInitial(false);
+      }),
+    []
+  );
+
+  const logout = () => {
+    setLoading(true);
+    signOut(auth)
+      .catch((error) => setError(error))
+      .finally(() => setLoading(false));
+  };
+
   const signInWithGoogle = async () => {
-    await Google.logInAsync(config)
+    setLoading(true);
+    await logInAsync(config)
       .then(async (logInResult) => {
         if (logInResult.type === "success") {
           const { idToken, accessToken } = logInResult;
@@ -50,19 +67,23 @@ export const AuthProvider = ({ children }) => {
           console.log("Heidad!");
         } else return Promise.reject();
       })
-      .catch((err) => {
-        error = err;
-      });
+      .catch((error) => setError(error))
+      .finally(() => setLoading(false));
   };
+  const memoValue = useMemo(
+    () => ({
+      user,
+      loading,
+      error,
+      signInWithGoogle,
+      logout,
+    }),
+    [user, loading, error]
+  );
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        signInWithGoogle,
-      }}
-    >
-      {children}
+    <AuthContext.Provider value={memoValue}>
+      {!loadingInitial && children}
     </AuthContext.Provider>
   );
 };

@@ -9,6 +9,8 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
+  StatusBar,
+  KeyboardAvoidingView,
 } from "react-native";
 // import SignUp from "./SignUp";
 import { LinearGradient } from "expo-linear-gradient";
@@ -60,8 +62,13 @@ const SignUp = ({ navigation }) => {
       style={styles.linearGradient}
       locations={[0, 0.1, 1]}
     >
+      <StatusBar />
       <View style={styles.mainView}>
         <View style={styles.TopView}>
+          <Image
+            style={styles.tinyLogo}
+            source={require("../../assets/MomentLogo.png")}
+          />
           <Icon
             name="arrow-back-circle-outline"
             size={45}
@@ -69,16 +76,14 @@ const SignUp = ({ navigation }) => {
             style={styles.backIcon}
             onPress={navigate}
           />
-          <Image
-            style={styles.tinyLogo}
-            source={{
-              uri: "https://www.momentumlabs.ai/wp-content/uploads/2021/07/logow.png",
-            }}
-          />
         </View>
 
-        <View style={styles.BottomView}>
-          <Text style={styles.textStyle}>Create New Account!</Text>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
+          keyboardVerticalOffset={Platform.OS === "ios" ? 40 : 0}
+          style={styles.BottomView}
+        >
+          <Text style={styles.textStyle}>Join Us Now !</Text>
           <Formik
             initialValues={{ email: "", password: "", confirmpassword: "" }}
             validateOnMount={true}
@@ -158,13 +163,13 @@ const SignUp = ({ navigation }) => {
                     style={styles.GradBtn}
                     locations={[0.1, 0.5, 1]}
                   >
-                    <Text style={styles.btnText}>Sign Up!</Text>
+                    <Text style={styles.btnText}>Sign Up !</Text>
                   </LinearGradient>
                 </TouchableOpacity>
               </View>
             )}
           </Formik>
-        </View>
+        </KeyboardAvoidingView>
       </View>
     </LinearGradient>
   );
@@ -172,12 +177,13 @@ const SignUp = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   mainView: {
-    marginTop: 40,
+    marginTop: 35,
     flex: 1,
     flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
     // backgroundColor: "rgb(36, 35, 34)",
+    fontFamily: "Helvetica-BoldOblique",
   },
   linearGradient: {
     flex: 1,
@@ -202,18 +208,24 @@ const styles = StyleSheet.create({
     // display: "flex",
     flex: 1,
     flexDirection: "row",
-    // justifyContent: "center",
+    justifyContent: "center",
     alignItems: "center",
+    // marginBottom: 40,
+    // padding: 5,
     // backgroundColor: "#6a3dff69",
     // background: rgb(2, 0, 36),
   },
   BottomView: {
+    flex: 6,
     alignItems: "center",
     width: "100%",
     height: "85%",
     // backgroundColor: "rgb(36, 35, 34)",
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
+    justifyContent: "center",
+    alignItems: "center",
+    // paddingBottom: 50,
   },
   tinyLogo: {
     width: "50%",
@@ -221,7 +233,7 @@ const styles = StyleSheet.create({
     height: "100%",
     marginTop: 60,
     marginBottom: 65,
-    marginLeft: "12%",
+    marginLeft: 65,
   },
   textStyle: {
     color: "white",
@@ -234,13 +246,13 @@ const styles = StyleSheet.create({
     display: "flex",
   },
   TextInput: {
-    width: "80%",
+    width: "76%",
     borderColor: "white",
     alignItems: "center",
     justifyContent: "center",
     alignContent: "center",
     textAlign: "center",
-    borderWidth: 1,
+    borderBottomWidth: 0.3,
     height: "12%",
     borderRadius: 30,
     paddingHorizontal: 10,
@@ -258,7 +270,7 @@ const styles = StyleSheet.create({
   },
   Button: {
     height: "12%",
-    width: "80%",
+    width: "42%",
     color: "white",
     // backgroundColor: "rgb(58,40,142)",
     marginTop: 30,
@@ -285,7 +297,7 @@ const styles = StyleSheet.create({
   //   fontWeight: "bold",
   // },
   backIcon: {
-    marginLeft: 10,
+    marginLeft: 32,
     marginTop: 5,
   },
   errors: {

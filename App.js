@@ -1,6 +1,6 @@
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, Text, View, LogBox } from "react-native";
-
+import { useFonts } from "expo-font";
 import { NavigationContainer, StackActions } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import useAuth, { AuthProvider } from "./src/useAuth";
@@ -11,6 +11,13 @@ LogBox.ignoreAllLogs(); //Ignore log notfication by message
 const Stack = createNativeStackNavigator();
 
 export default function App() {
+  const [fontsLoaded] = useFonts({
+    "Helvetica-Bold": require("./assets/fonts/Helvetica-Bold.ttf"),
+    "Helvetica-BoldOblique": require("./assets/fonts/Helvetica-BoldOblique.ttf"),
+    "SharpSansNo1-Book": require("./assets/fonts/SharpSansNo1-Book.ttf"),
+  });
+
+  console.log(fontsLoaded ? "fonts loaded!" : "fonts error!!");
   return (
     <NavigationContainer screenOptions={{ headerTransparent: true }}>
       <AuthProvider>

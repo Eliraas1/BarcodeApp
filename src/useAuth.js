@@ -7,7 +7,15 @@ import {
   signInWithCredential,
   signOut,
 } from "@firebase/auth";
-import { auth } from "../Firebase/firebase";
+import {
+  auth,
+  db,
+  doc,
+  setDoc,
+  getDocs,
+  collection,
+  deleteDoc,
+} from "../Firebase/firebase";
 import { createContext, useContext, useEffect } from "react";
 // import AsyncStorage from "@react-native-async-storage/async-storage";
 const AuthContext = createContext({});
@@ -27,16 +35,92 @@ let error;
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  console.log(user);
-  useEffect(() => {
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setUser(user);
-      } else {
-        setUser(null);
-      }
-    });
-  }, []);
+  const [loadingInitial, setLoadingInitial] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  // console.log(user);
+
+  useEffect(
+    () =>
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          setUser(user);
+        } else {
+          setUser(null);
+        }
+        setLoadingInitial(false);
+      }),
+    []
+  );
+
+  // const { uid } = user;
+  const [userInputs, setUserInput] = useState({
+    Company: "Eliran",
+    Points: 25,
+  });
+
+  const Create = () => {
+    const myDoc = doc(db, "users", user.uid, "companies", userInputs.Company);
+    setLoading(true);
+    setDoc(myDoc, userInputs)
+      .then(() => {
+        console.log(userInputs);
+      })
+      .catch(() => {
+        alert("Error!!");
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
+
+  const Read = () => {
+    setLoading(true);
+    const arr = [];
+    const collect = collection(db, "users", user.uid, "companies");
+    getDocs(collect)
+      .then((doc) => {
+        doc.docs.map((doc) => {
+          arr.push([doc.data().Company, doc.data().Points]);
+        });
+        arr.forEach((data) => console.log(data));
+      })
+      .catch(() => {
+        console.log("ERRORRR READING DATA!");
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
+
+  const Update = (merge) => {
+    const myDoc = doc(db, "users", user.uid, "companies", userInputs.Company);
+    setDoc(myDoc, userInputs, { merge: merge })
+      .then(() => {
+        alert("updated");
+        setLo;
+      })
+      .catch((err) => {
+        alert("err");
+      });
+  };
+
+  const Delete = () => {
+    deleteDoc(doc(db, "users", user.uid, "companies", "Diesel"))
+      .then(() => {
+        alert("deleted");
+      })
+      .catch((err) => {
+        alert(err);
+      });
+  };
+  const logout = () => {
+    setLoading(true);
+    signOut(auth)
+      .catch((error) => setError(error))
+      .finally(() => setLoading(false));
+  };
+
   const signInWithGoogle = async () => {
     await Google.logInAsync(config)
       .then(async (logInResult) => {
@@ -54,6 +138,21 @@ export const AuthProvider = ({ children }) => {
         error = err;
       });
   };
+
+  const memoValue = useMemo(
+    () => ({
+      user,
+      loading,
+      error,
+      signInWithGoogle,
+      logout,
+      Create,
+      Read,
+      Update,
+      Delete,
+    }),
+    [user, loading, error]
+  );
 
   return (
     <AuthContext.Provider

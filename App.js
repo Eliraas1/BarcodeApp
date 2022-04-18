@@ -8,6 +8,7 @@ import StackNavigator from "./src/StackNavigator";
 // import AppLoading from "expo-app-loading";
 // import { useFonts } from "expo-font";
 LogBox.ignoreAllLogs(); //Ignore log notfication by message
+LogBox.ignoreLogs(["Setting a timer for a long period of time"]);
 const Stack = createNativeStackNavigator();
 
 export default function App() {

@@ -14,7 +14,7 @@ import {
 } from "../../Firebase/firebase";
 
 const Home = () => {
-  const { logout, user, setLoading } = useAuth();
+  const { logout, user } = useAuth();
 
   const { uid } = user;
   const [userInputs, setUserInput] = useState({

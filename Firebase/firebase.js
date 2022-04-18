@@ -5,7 +5,16 @@ import {
   GoogleAuthProvider,
   signInWithEmailAndPassword,
 } from "firebase/auth";
-import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
+import {
+  getFirestore,
+  doc,
+  setDoc,
+  getDoc,
+  addDoc,
+  collection,
+  getDocs,
+  deleteDoc,
+} from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDkE0L3ZPEzKtJ9ssNmokmVm4dv5fXeMqA",
@@ -36,5 +45,9 @@ export {
   doc,
   setDoc,
   getDoc,
+  addDoc,
+  collection,
+  getDocs,
   signInWithEmailAndPassword,
+  deleteDoc,
 };

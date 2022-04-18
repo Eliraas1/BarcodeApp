@@ -31,7 +31,7 @@ export const AuthProvider = ({ children }) => {
   const [loadingInitial, setLoadingInitial] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  console.log(user);
+  // console.log(user);
 
   useEffect(
     () =>
@@ -70,10 +70,12 @@ export const AuthProvider = ({ children }) => {
       .catch((error) => setError(error))
       .finally(() => setLoading(false));
   };
+
   const memoValue = useMemo(
     () => ({
       user,
       loading,
+      setLoading,
       error,
       signInWithGoogle,
       logout,

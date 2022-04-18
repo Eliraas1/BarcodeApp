@@ -27,7 +27,7 @@ const SignIn = ({ navigation }) => {
   //   console.log("asd");
   // };
   const navigate = () => {
-    console.log(auth);
+    // console.log(auth);
     navigation.navigate("SignUp");
   };
 

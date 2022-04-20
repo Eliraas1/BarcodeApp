@@ -1,113 +1,156 @@
-import { Button, View, Text, Image } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  FlatList,
+  SafeAreaView,
+} from "react-native";
 import React, { useState } from "react";
 import useAuth from "../useAuth";
-import AnimatedSplash from "react-native-animated-splash-screen";
+import Loading from "../Loading";
+// import AnimatedSplash from "react-native-animated-splash-screen";
+// import {} from "../../Firebase/firebase";
 import {
-  db,
-  doc,
-  setDoc,
-  getDoc,
-  addDoc,
-  getDocs,
-  collection,
-  deleteDoc,
-} from "../../Firebase/firebase";
+  // widthPercentageToDP as wp,
+  heightPercentageToDP as hp,
+} from "react-native-responsive-screen";
+import BarCode from "../components/BarCode";
+import { AppBar, IconButton, FAB } from "@react-native-material/core";
+import Icon from "@expo/vector-icons/MaterialCommunityIcons";
+import CompanyCard from "../components/CompanyCard";
+import Background from "../components/Background";
 
 const Home = () => {
-  const { logout, user } = useAuth();
+  const { loading, logout, Create, Read, Delete } = useAuth();
 
-  const { uid } = user;
-  const [userInputs, setUserInput] = useState({
-    Company: "Maccabis",
-    Points: 25,
-  });
+  //STATES FOR BARCODE
+  const [isBarcodeScanned, setIsBarcodeScanned] = useState(false);
+  const [barCodeData, setBarCodeData] = useState([]);
 
-  const Create = async () => {
-    const myDoc = doc(db, "users", uid, "companies", userInputs.Company);
-    await setDoc(myDoc, userInputs);
+  const handleAdd = () => {
+    setIsBarcodeScanned(true);
   };
 
-  const Read = async () => {
-    const collect = collection(db, "users", uid, "companies");
-    const documents = await getDocs(collect);
-    const arr = [];
-    documents.docs.map((doc) => {
-      arr.push([doc.data().Company, doc.data().Points]);
-    });
-    arr.forEach((data) => console.log(data));
-    console.log(arr);
-  };
-
-  const Update = (merge) => {
-    const myDoc = doc(db, "users", uid, "companies", userInputs.Company);
-    setDoc(myDoc, userInputs, { merge: merge })
-      .then(() => {
-        alert("updated");
-        setLo;
-      })
-      .catch((err) => {
-        alert("err");
-      });
-  };
-
-  const Delete = () => {
-    const collect = collection(db, "users", uid, "companies");
-    // const myDoc = doc(db, "users", uid, "companies", userInputs.Company);
-    deleteDoc(doc(db, "users", uid, "companies", "Diesel"))
-      .then(() => {
-        alert("deleted");
-      })
-      .catch((err) => {
-        alert(err);
-      });
-  };
-
-  const checkExist = async (brand) => {
-    const docs = doc(db, "users", uid, "companies", brand);
-    const snap = await getDoc(docs);
-    const isExist = snap.exists();
-    return isExist;
-  };
-
-  const Add = async () => {
-    //user input
-    const brand = "Pizza Hut";
-    const companies = "companies";
-    const Points = 15;
-    const value = {
-      Company: brand,
-      Points: Points,
-    };
-
-    const check = await checkExist(brand);
-    if (check) {
-      alert(brand + "already exist");
-      return;
-    }
-    const cpm = doc(db, "users", uid, companies, brand);
-    await setDoc(cpm, value);
-  };
-
-  return (
-    <View>
-      <Text>Home</Text>
-      <Text>Home</Text>
-      <Text>Home</Text>
-      <Button title="logout" onPress={logout} />
-      <Button title="Create" onPress={Create} />
-      <Button title="Read" onPress={Read} />
-      <Button title="Delete" onPress={Delete} />
-      <Button
-        title="Update"
-        onPress={() => {
-          Update(true);
-        }}
+  const HandleBarcodeScan = () => {
+    return (
+      <BarCode
+        setIsBarcodeScanned={setIsBarcodeScanned}
+        barCodeData={barCodeData}
+        setBarCodeData={setBarCodeData}
       />
-      {/* <Button title="logout" onPress={logout} />
-      <Button title="logout" onPress={logout} />
-      <Button title="logout" onPress={logout} /> */}
+    );
+  };
+
+  const renderCards = ({ item }) => {
+    return <CompanyCard data={{ item }} />;
+  };
+
+  const renderItems = () => (
+    // <SafeAreaView>
+    <Background>
+      <SafeAreaView
+        style={{
+          paddingHorizontal: 30,
+          flex: 1,
+          width: "100%",
+          // backgroundColor: "black",
+        }}
+      >
+        <FlatList
+          data={barCodeData}
+          renderItem={renderCards}
+          keyExtractor={(item) => item.Company}
+        />
+      </SafeAreaView>
+    </Background>
+    // </SafeAreaView>
+  );
+
+  if (loading) return <Loading />;
+
+  return isBarcodeScanned ? (
+    HandleBarcodeScan()
+  ) : (
+    <View style={styles.container}>
+      <TouchableOpacity
+        style={{
+          width: "100%",
+          height: "10%",
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: "tomato",
+        }}
+        onPress={logout}
+      >
+        <Text>Logout</Text>
+      </TouchableOpacity>
+
+      {!isBarcodeScanned ? renderItems() : null}
+
+      <AppBar
+        variant="bottom"
+        leading={(props) => (
+          <IconButton
+            icon={(props) => <Icon name="menu" {...props} />}
+            {...props}
+          />
+        )}
+        trailing={(props) => (
+          <IconButton
+            icon={(props) => <Icon name="magnify" {...props} />}
+            {...props}
+          />
+        )}
+        style={{ position: "absolute", start: 0, end: 0, bottom: 0 }}
+      >
+        <FAB
+          onPress={() => handleAdd()}
+          icon={(props) => <Icon name="plus" {...props} />}
+          style={{ position: "absolute", top: -28, alignSelf: "center" }}
+        />
+      </AppBar>
     </View>
   );
+  {
+    /* <Button title="logout" onPress={logout} />
+  <Button title="Create" onPress={Create} />
+  <Button title="Read" onPress={Read} />
+  <Button title="Delete" onPress={Delete} />
+  <Button
+    title="Update"
+    onPress={() => {
+      Update(true);
+    }}
+  /> */
+  }
 };
 
 export default Home;
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  Navbar: {
+    flexDirection: "row",
+    alignItems: "center",
+
+    justifyContent: "flex-end",
+    height: hp("10%"),
+    width: "100%",
+    backgroundColor: "black",
+    borderBottomLeftRadius: hp("2.5%"),
+    borderBottomRightRadius: hp("2.5%"),
+    paddingTop: 15,
+  },
+  PlusButton: {
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "white",
+    width: "15%",
+    height: "100%",
+    borderBottomRightRadius: hp("2.5%"),
+    fontSize: hp("5%"),
+  },
+});

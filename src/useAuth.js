@@ -54,17 +54,23 @@ export const AuthProvider = ({ children }) => {
   );
 
   // const { uid } = user;
-  const [userInputs, setUserInput] = useState({
-    Company: "Eliran",
-    Points: 25,
-  });
+  const [userInputs, setUserInput] = useState();
 
-  const Create = () => {
-    const myDoc = doc(db, "users", user.uid, "companies", userInputs.Company);
+  const Create = (data) => {
+    console.log(data.Company);
+    console.log(data.Points);
+    console.log(data.LOGO);
+
+    const obj = {
+      Company: data.Company,
+      Points: parseInt(data.Points),
+      Logo: data.LOGO,
+    };
+    const myDoc = doc(db, "users", user.uid, "companies", data.Company);
     setLoading(true);
-    setDoc(myDoc, userInputs)
+    setDoc(myDoc, obj)
       .then(() => {
-        console.log(userInputs);
+        console.log(obj);
       })
       .catch(() => {
         alert("Error!!");
@@ -98,7 +104,6 @@ export const AuthProvider = ({ children }) => {
     setDoc(myDoc, userInputs, { merge: merge })
       .then(() => {
         alert("updated");
-        setLo;
       })
       .catch((err) => {
         alert("err");
@@ -157,14 +162,7 @@ export const AuthProvider = ({ children }) => {
   );
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        signInWithGoogle,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
+    <AuthContext.Provider value={memoValue}>{children}</AuthContext.Provider>
   );
 };
 

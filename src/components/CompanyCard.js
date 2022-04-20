@@ -6,10 +6,7 @@ const CompanyCard = ({ data }) => {
   const { item } = data;
   return (
     <Card>
-      <Card.Title
-        title={item.Company}
-        subtitle={"Points or SOMETHINF ELSE in future"}
-      />
+      <Card.Title title={item.Company} subtitle={item.Points} />
       <Card.Cover
         source={{
           uri: item.LOGO,

@@ -5,6 +5,12 @@ import {
   GoogleAuthProvider,
   signInWithEmailAndPassword,
 } from "firebase/auth";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import {
+  getReactNativePersistence,
+  initializeAuth,
+} from "firebase/auth/react-native";
+
 import {
   getFirestore,
   doc,
@@ -34,7 +40,13 @@ if (getApps().length < 1) {
   app = getApps();
 }
 // const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+// const auth = getAuth(app);
+// Import it from your preferred package.
+
+// Provide it to initializeAuth.
+const auth = initializeAuth(app, {
+  persistence: getReactNativePersistence(AsyncStorage),
+});
 const db = getFirestore(app);
 
 export {

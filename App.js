@@ -5,7 +5,7 @@ import { NavigationContainer, StackActions } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import useAuth, { AuthProvider } from "./src/useAuth";
 import StackNavigator from "./src/StackNavigator";
-// import AppLoading from "expo-app-loading";
+import AppLoading from "expo-app-loading";
 // import { useFonts } from "expo-font";
 LogBox.ignoreAllLogs(); //Ignore log notfication by message
 const Stack = createNativeStackNavigator();
@@ -16,15 +16,18 @@ export default function App() {
     "Helvetica-BoldOblique": require("./assets/fonts/Helvetica-BoldOblique.ttf"),
     "SharpSansNo1-Book": require("./assets/fonts/SharpSansNo1-Book.ttf"),
   });
-
   console.log(fontsLoaded ? "fonts loaded!" : "fonts error!!");
-  return (
-    <NavigationContainer screenOptions={{ headerTransparent: true }}>
-      <AuthProvider>
-        <StackNavigator />
-      </AuthProvider>
-    </NavigationContainer>
-  );
+  if (!fontsLoaded) {
+    return <AppLoading />;
+  } else {
+    return (
+      <NavigationContainer screenOptions={{ headerTransparent: true }}>
+        <AuthProvider>
+          <StackNavigator />
+        </AuthProvider>
+      </NavigationContainer>
+    );
+  }
 }
 
 /*

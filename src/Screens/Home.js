@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   FlatList,
   SafeAreaView,
+  Button,
 } from "react-native";
 import React, { useState } from "react";
 import useAuth from "../useAuth";
@@ -72,7 +73,7 @@ const Home = () => {
   return isBarcodeScanned ? (
     HandleBarcodeScan()
   ) : (
-    <View style={styles.container}>
+    <Background>
       <TouchableOpacity
         style={{
           width: "100%",
@@ -85,32 +86,20 @@ const Home = () => {
       >
         <Text>Logout</Text>
       </TouchableOpacity>
-
+      <Button title="Read" onPress={Read} />
       {!isBarcodeScanned ? renderItems() : null}
 
-      <AppBar
-        variant="bottom"
-        leading={(props) => (
-          <IconButton
-            icon={(props) => <Icon name="menu" {...props} />}
-            {...props}
-          />
-        )}
-        trailing={(props) => (
-          <IconButton
-            icon={(props) => <Icon name="magnify" {...props} />}
-            {...props}
-          />
-        )}
-        style={{ position: "absolute", start: 0, end: 0, bottom: 0 }}
-      >
-        <FAB
-          onPress={() => handleAdd()}
-          icon={(props) => <Icon name="plus" {...props} />}
-          style={{ position: "absolute", top: -28, alignSelf: "center" }}
-        />
-      </AppBar>
-    </View>
+      <FAB
+        onPress={() => handleAdd()}
+        icon={(props) => <Icon name="plus" {...props} />}
+        // color="white"
+        style={{
+          // position: "absolute",
+          top: -28,
+          alignSelf: "center",
+        }}
+      />
+    </Background>
   );
   {
     /* <Button title="logout" onPress={logout} />

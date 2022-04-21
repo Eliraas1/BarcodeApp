@@ -7,7 +7,11 @@ import useAuth, { AuthProvider } from "./src/useAuth";
 import StackNavigator from "./src/StackNavigator";
 import AppLoading from "expo-app-loading";
 // import { useFonts } from "expo-font";
+LogBox.ignoreLogs([
+  "Non-serializable values were found in the navigation state",
+]);
 LogBox.ignoreAllLogs(); //Ignore log notfication by message
+
 const Stack = createNativeStackNavigator();
 
 export default function App() {

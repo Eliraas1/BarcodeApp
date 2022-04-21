@@ -17,6 +17,7 @@ import {
   deleteDoc,
 } from "../Firebase/firebase";
 import { createContext, useContext, useEffect } from "react";
+import { where, query } from "firebase/firestore";
 // import AsyncStorage from "@react-native-async-storage/async-storage";
 const AuthContext = createContext({});
 
@@ -53,43 +54,62 @@ export const AuthProvider = ({ children }) => {
     []
   );
 
-  // const { uid } = user;
   const [userInputs, setUserInput] = useState();
+  const [userData, setuserData] = useState([]);
+  const [isBarcodeScanned, setIsBarcodeScanned] = useState(false);
 
   const Create = (data) => {
-    console.log(data.Company);
-    console.log(data.Points);
-    console.log(data.LOGO);
-
-    const obj = {
+    let obj = {
       Company: data.Company,
       Points: parseInt(data.Points),
-      Logo: data.LOGO,
+      Logo: data.Logo,
     };
+    //check if data exist and updates points
+    // else created new one in DB
+    const checkData = isExist(obj);
+    if (checkData.Company !== undefined) {
+      obj = {
+        ...obj,
+        Points: obj.Points + parseInt(checkData.Points),
+      };
+
+      userData.forEach((object) => {
+        if (object.Company === obj.Company)
+          object.Points += parseInt(obj.Points);
+      });
+      setuserData(userData);
+      console.log(userData);
+    }
     const myDoc = doc(db, "users", user.uid, "companies", data.Company);
     setLoading(true);
     setDoc(myDoc, obj)
       .then(() => {
-        console.log(obj);
+        // arr.push(obj);
       })
       .catch(() => {
         alert("Error!!");
       })
       .finally(() => {
         setLoading(false);
+        setIsBarcodeScanned(true);
       });
   };
 
   const Read = () => {
+    // setuserData(null);
+    while (userData.length > 0) userData.pop();
+
+    setuserData(userData);
+
     setLoading(true);
-    const arr = [];
     const collect = collection(db, "users", user.uid, "companies");
     getDocs(collect)
       .then((doc) => {
         doc.docs.map((doc) => {
-          arr.push([doc.data().Company, doc.data().Points]);
+          userData.push(doc.data());
+          setuserData(userData);
         });
-        arr.forEach((data) => console.log(data));
+        // userData.forEach((data) => console.log(data));
       })
       .catch(() => {
         console.log("ERRORRR READING DATA!");
@@ -97,6 +117,18 @@ export const AuthProvider = ({ children }) => {
       .finally(() => {
         setLoading(false);
       });
+  };
+
+  const isExist = (object) => {
+    const { Company } = object;
+    let newObj = {};
+    userData.forEach((obj) => {
+      if (obj.Company === Company) {
+        newObj = obj;
+        return;
+      }
+    });
+    return newObj;
   };
 
   const Update = (merge) => {
@@ -157,8 +189,11 @@ export const AuthProvider = ({ children }) => {
       Read,
       Update,
       Delete,
+      userData,
+      setIsBarcodeScanned,
+      isBarcodeScanned,
     }),
-    [user, loading, error]
+    [user, loading, error, userData, isBarcodeScanned]
   );
 
   return (

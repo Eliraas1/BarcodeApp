@@ -30,6 +30,8 @@
     "firebase-cli": "^1.2.0",
     "formik": "^2.2.9",
     "install": "^0.13.0",
+    "lottie-ios": "^3.2.3",
+    "lottie-react-native": "5.0.1",
     "pod": "^0.9.0",
     "pod-install": "^0.1.32",
     "react": "17.0.1",

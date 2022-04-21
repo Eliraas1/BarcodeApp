@@ -7,7 +7,7 @@ import {
   SafeAreaView,
   Button,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import useAuth from "../useAuth";
 import Loading from "../Loading";
 // import AnimatedSplash from "react-native-animated-splash-screen";
@@ -16,31 +16,46 @@ import {
   // widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from "react-native-responsive-screen";
-import BarCode from "../components/BarCode";
-import { AppBar, IconButton, FAB } from "@react-native-material/core";
-import Icon from "@expo/vector-icons/MaterialCommunityIcons";
+// import BarCode from "../components/BarCode";
+// import { AppBar, IconButton, FAB } from "@react-native-material/core";
+// import Icon from "@expo/vector-icons/MaterialCommunityIcons";
 import CompanyCard from "../components/CompanyCard";
 import Background from "../components/Background";
+import LottieView from "lottie-react-native";
 
-const Home = () => {
-  const { loading, logout, Create, Read, Delete } = useAuth();
+const Home = ({ navigation }) => {
+  const {
+    loading,
+    logout,
+    Create,
+    Read,
+    Delete,
+    userData,
+    isBarcodeScanned,
+    setIsBarcodeScanned,
+  } = useAuth();
+  // const [isBarcodeScanned, setIsBarcodeScanned] = useState(false);
 
-  //STATES FOR BARCODE
-  const [isBarcodeScanned, setIsBarcodeScanned] = useState(false);
-  const [barCodeData, setBarCodeData] = useState([]);
+  const animation = useRef(null);
 
-  const handleAdd = () => {
-    setIsBarcodeScanned(true);
-  };
+  useEffect(() => {
+    let timerid = null;
+    // console.log("\nasdasd\n");
+    if (isBarcodeScanned) {
+      animation.current.play(0, 18);
+      timerid = setTimeout(() => {
+        animation.current.play(18, 0);
+      }, 1500);
+      return () => {
+        clearTimeout(timerid);
+      };
+    }
+  }, [isBarcodeScanned]);
 
-  const HandleBarcodeScan = () => {
-    return (
-      <BarCode
-        setIsBarcodeScanned={setIsBarcodeScanned}
-        barCodeData={barCodeData}
-        setBarCodeData={setBarCodeData}
-      />
-    );
+  const navigate = () => {
+    navigation.navigate("BarCode", {
+      setIsBarcodeScanned: setIsBarcodeScanned,
+    });
   };
 
   const renderCards = ({ item }) => {
@@ -48,31 +63,24 @@ const Home = () => {
   };
 
   const renderItems = () => (
-    // <SafeAreaView>
-    <Background>
-      <SafeAreaView
-        style={{
-          paddingHorizontal: 30,
-          flex: 1,
-          width: "100%",
-          // backgroundColor: "black",
-        }}
-      >
-        <FlatList
-          data={barCodeData}
-          renderItem={renderCards}
-          keyExtractor={(item) => item.Company}
-        />
-      </SafeAreaView>
-    </Background>
-    // </SafeAreaView>
+    <SafeAreaView
+      style={{
+        paddingHorizontal: 30,
+        flex: 1,
+        width: "100%",
+      }}
+    >
+      <FlatList
+        data={userData}
+        renderItem={renderCards}
+        keyExtractor={(item) => item.Company}
+      />
+    </SafeAreaView>
   );
 
   if (loading) return <Loading />;
 
-  return isBarcodeScanned ? (
-    HandleBarcodeScan()
-  ) : (
+  return (
     <Background>
       <TouchableOpacity
         style={{
@@ -87,10 +95,19 @@ const Home = () => {
         <Text>Logout</Text>
       </TouchableOpacity>
       <Button title="Read" onPress={Read} />
-      {!isBarcodeScanned ? renderItems() : null}
-
-      <FAB
-        onPress={() => handleAdd()}
+      {renderItems()}
+      <TouchableOpacity style={styles.plusLottie} onPress={() => navigate()}>
+        <LottieView
+          ref={animation}
+          source={require("../../assets/lottie/plus.json")}
+          autoPlay={false}
+          loop={false}
+          speed={0.4}
+          onAnimationFinish={() => setIsBarcodeScanned(false)}
+        />
+      </TouchableOpacity>
+      {/* <FAB
+        onPress={() => navigate()}
         icon={(props) => <Icon name="plus" {...props} />}
         // color="white"
         style={{
@@ -98,21 +115,9 @@ const Home = () => {
           top: -28,
           alignSelf: "center",
         }}
-      />
+      /> */}
     </Background>
   );
-  {
-    /* <Button title="logout" onPress={logout} />
-  <Button title="Create" onPress={Create} />
-  <Button title="Read" onPress={Read} />
-  <Button title="Delete" onPress={Delete} />
-  <Button
-    title="Update"
-    onPress={() => {
-      Update(true);
-    }}
-  /> */
-  }
 };
 
 export default Home;
@@ -120,6 +125,12 @@ export default Home;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  plusLottie: {
+    width: hp("11.5%"),
+    height: hp("11.5%"),
+    top: -28,
+    alignSelf: "center",
   },
   Navbar: {
     flexDirection: "row",

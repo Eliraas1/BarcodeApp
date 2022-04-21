@@ -9,7 +9,7 @@ const CompanyCard = ({ data }) => {
       <Card.Title title={item.Company} subtitle={item.Points} />
       <Card.Cover
         source={{
-          uri: item.LOGO,
+          uri: item.Logo,
         }}
       />
     </Card>

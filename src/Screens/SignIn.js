@@ -7,6 +7,8 @@ import {
   TextInput,
   TouchableOpacity,
   KeyboardAvoidingView,
+  StatusBar,
+  ActivityIndicator,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Formik } from "formik";
@@ -16,20 +18,23 @@ import { auth, signInWithEmailAndPassword } from "../../Firebase/firebase";
 import useAuth from "../useAuth";
 import { RFPercentage, RFValue } from "react-native-responsive-fontsize";
 import { SocialIcon } from "react-native-elements";
-
+import Loading from "../Loading";
+import { heightPercentageToDP } from "react-native-responsive-screen";
 const SignIn = ({ navigation }) => {
-  const { signInWithGoogle } = useAuth();
+  const { signInWithGoogle, loading, Googleloading, setLoading, setLogged } =
+    useAuth();
   const [error, setError] = useState(" ");
   const [isError, setIsError] = useState(false);
   // const signInWithGoogle = () => {
   //   console.log("asd");
   // };
   const navigate = () => {
-    console.log(auth);
+    // console.log(auth);
     navigation.navigate("SignUp");
   };
 
   const HandleSignIn = (value) => {
+    setLoading(true);
     signInWithEmailAndPassword(auth, value.email, value.password)
       .then((res) => {
         console.log(`${value.email} is connected succsessfully!`);
@@ -42,110 +47,123 @@ const SignIn = ({ navigation }) => {
             setError("Email or Password Incorrect!");
             break;
         }
+      })
+      .finally(() => {
+        Read();
+        setLogged(true);
       });
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 40 : 0}
-      style={styles.mainView}
-    >
-      <LinearGradient
-        colors={["#5a36db", "#3a288e", "rgb(36, 35, 34)"]}
-        style={styles.linearGradient}
-        locations={[0.1, 0.3, 1]}
-      >
-        <View style={styles.TopView}>
-          <Image
-            style={styles.tinyLogo}
-            source={{
-              uri: "https://www.momentumlabs.ai/wp-content/uploads/2021/07/logow.png",
-            }}
-          />
-        </View>
-      </LinearGradient>
-
-      <View style={styles.BottomView}>
-        <Text style={styles.textStyle}>Welcome Back !</Text>
-        <Formik
-          initialValues={{ email: "", password: "" }}
-          validateOnMount={true}
-          onSubmit={HandleSignIn}
-          validationSchema={schema}
+    <>
+      {!loading ? (
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
+          keyboardVerticalOffset={Platform.OS === "ios" ? 40 : 0}
+          style={styles.mainView}
         >
-          {({
-            handleChange,
-            handleBlur,
-            handleSubmit,
-            values,
-            touched,
-            isValid,
-            errors,
-          }) => (
-            <View style={styles.FormView}>
-              {isError && <ValidErrors error={error} />}
-              <TextInput
-                name="email"
-                placeholder="Email Address*"
-                style={styles.TextInput}
-                onChangeText={handleChange("email")}
-                onBlur={handleBlur("email")}
-                value={values.email}
-                keyboardType="email-address"
-                placeholderTextColor={"white"}
+          <StatusBar />
+          <LinearGradient
+            colors={["#5a36db", "#3a288e", "rgb(36, 35, 34)"]}
+            style={styles.linearGradient}
+            locations={[0.1, 0.3, 1]}
+          >
+            <View style={styles.TopView}>
+              <Image
+                style={styles.tinyLogo}
+                source={require("../../assets/MomentLogo.png")}
               />
-              {errors.email && touched.email && (
-                <Text style={styles.errors}>{errors.email}</Text>
+            </View>
+          </LinearGradient>
+
+          <View style={styles.BottomView}>
+            <Text style={styles.textStyle}>Welcome Back !</Text>
+            <Formik
+              initialValues={{ email: "", password: "" }}
+              validateOnMount={true}
+              onSubmit={HandleSignIn}
+              validationSchema={schema}
+            >
+              {({
+                handleChange,
+                handleBlur,
+                handleSubmit,
+                values,
+                touched,
+                isValid,
+                errors,
+              }) => (
+                <View style={styles.FormView}>
+                  {isError && <ValidErrors error={error} />}
+                  <TextInput
+                    name="email"
+                    placeholder="Email Address*"
+                    style={styles.TextInput}
+                    onChangeText={handleChange("email")}
+                    onBlur={handleBlur("email")}
+                    value={values.email}
+                    keyboardType="email-address"
+                    placeholderTextColor={"white"}
+                  />
+                  {errors.email && touched.email && (
+                    <Text style={styles.errors}>{errors.email}</Text>
+                  )}
+                  <TextInput
+                    name="password"
+                    placeholder="Password*"
+                    style={styles.TextInput}
+                    onChangeText={handleChange("password")}
+                    onBlur={handleBlur("password")}
+                    value={values.password}
+                    placeholderTextColor={"white"}
+                    secureTextEntry
+                  />
+                  {errors.password && touched.password && (
+                    <Text style={styles.errors}>{errors.password}</Text>
+                  )}
+                  <TouchableOpacity
+                    style={styles.Button}
+                    onPress={handleSubmit}
+                  >
+                    <LinearGradient
+                      colors={["#845EEE", "#6F45FB", "#7045FD"]}
+                      start={[0.1, 0.1]}
+                      end={[1, 0.3]}
+                      style={styles.GradBtn}
+                      locations={[0.1, 0.5, 1]}
+                    >
+                      <Text style={styles.btnText}>Sign in</Text>
+                    </LinearGradient>
+                  </TouchableOpacity>
+                </View>
               )}
-              <TextInput
-                name="password"
-                placeholder="Password*"
-                style={styles.TextInput}
-                onChangeText={handleChange("password")}
-                onBlur={handleBlur("password")}
-                value={values.password}
-                placeholderTextColor={"white"}
-                secureTextEntry
-              />
-              {errors.password && touched.password && (
-                <Text style={styles.errors}>{errors.password}</Text>
-              )}
-              <TouchableOpacity style={styles.Button} onPress={handleSubmit}>
+            </Formik>
+            <View style={styles.DownButtonsView}>
+              <TouchableOpacity style={styles.SignUpBtn} onPress={navigate}>
                 <LinearGradient
-                  colors={["#845EEE", "#6F45FB", "#7045FD"]}
-                  start={[0.1, 0.1]}
-                  end={[1, 0.3]}
+                  colors={["#6646DC", "#3E2A97", "#6646DC"]}
+                  start={[0, 0.1]}
+                  end={[0.5, 1]}
                   style={styles.GradBtn}
-                  locations={[0.1, 0.5, 1]}
+                  locations={[1, 0.9, 1]}
                 >
-                  <Text style={styles.btnText}>Sign in</Text>
+                  <Text style={styles.SignUpText}>Sign up</Text>
                 </LinearGradient>
               </TouchableOpacity>
+              <SocialIcon
+                style={styles.SignUpBtn}
+                type="google"
+                button
+                onPress={signInWithGoogle}
+                loading={Googleloading}
+              />
             </View>
-          )}
-        </Formik>
-        <View style={styles.DownButtonsView}>
-          <TouchableOpacity style={styles.SignUpBtn} onPress={navigate}>
-            <LinearGradient
-              colors={["#6646DC", "#3E2A97", "#6646DC"]}
-              start={[0, 0.1]}
-              end={[0.5, 1]}
-              style={styles.GradBtn}
-              locations={[1, 0.9, 1]}
-            >
-              <Text style={styles.SignUpText}>Sign up</Text>
-            </LinearGradient>
-          </TouchableOpacity>
-          <SocialIcon
-            style={styles.SignUpBtn}
-            type="google"
-            button
-            onPress={signInWithGoogle}
-          />
-        </View>
-      </View>
-    </KeyboardAvoidingView>
+          </View>
+        </KeyboardAvoidingView>
+      ) : (
+        <Loading />
+      )}
+    </>
   );
 };
 
@@ -164,18 +182,20 @@ const styles = StyleSheet.create({
     fontFamily: "Helvetica-BoldOblique",
   },
   linearGradient: {
-    flex: 1,
+    flex: 1.3,
+    // height: heightPercentageToDP("18%"),
     width: "100%",
-    // height: "100%",
+    justifyContent: "center",
+    alignItems: "center",
     paddingLeft: 15,
     paddingRight: 15,
     backgroundColor: "transparent",
   },
 
   TopView: {
-    flex: 1,
+    // flex: 3,
     width: "100%",
-    height: "120%",
+    height: "100%",
     // display: "flex",
     justifyContent: "center",
     alignItems: "center",
@@ -184,28 +204,27 @@ const styles = StyleSheet.create({
   DownButtonsView: {
     // flex: 3,
     width: "70%",
-    height: "41%",
+    // height: "41%",
+    height: heightPercentageToDP("22%"),
     // marginTop: 10,
     // flex: 1,
     // display: "flex",
     flexDirection: "row",
-    // alignItems: "center",
+    alignItems: "center",
     // alignContent: "center",
-    paddingBottom: 75,
-    // justifyContent: "space-between",
+    // marginBottom: 75,
+    justifyContent: "center",
     // backgroundColor: "white",
   },
   BottomView: {
     flex: 5,
     width: "100%",
-    height: "80%",
+    // height: "80%",
     backgroundColor: "rgb(36, 35, 34)",
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
     alignItems: "center",
-    alignContent: "flex-start",
-    // marginBottom: 50,
-    // display: "flex",
+    alignContent: "center",
     fontFamily: "Helvetica-BoldOblique",
   },
   tinyLogo: {
@@ -233,14 +252,7 @@ const styles = StyleSheet.create({
     // flex: 1,
     width: "76%",
     backgroundColor: "rgb(36, 35, 34)",
-    // shadowColor: "white",
-    // shadowOffset: {
-    //   width: 0,
-    //   height: 2,
-    // },
-    // shadowOpacity: 0.23,
-    // shadowRadius: 2.62,
-    // elevation: 4,
+
     borderColor: "white",
     borderRadius: 30,
     // borderWidth: 0.3,
@@ -256,18 +268,20 @@ const styles = StyleSheet.create({
   FormView: {
     // flex: 5,
     width: "100%",
-    height: "67%",
+    height: "60%",
+    // minHeight: 85,
     // display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    alignContent: "center",
-    marginTop: 10,
+    // justifyContent: "center",
+    // marginTop: 10,
     // fontFamily: "Helvetica-BoldOblique",
     // backgroundColor: "white",
   },
   Button: {
     // display: "flex",
-    height: "14%",
+    // height: "14%",
+    height: heightPercentageToDP("6%"),
     // flex: 2,
     width: "42%",
     color: "white",
@@ -303,26 +317,13 @@ const styles = StyleSheet.create({
     width: "49%",
     color: "white",
     // marginTop: 70,
-    // margin: 5,
-    alignItems: "center",
-    // justifyContent: "center",
     borderRadius: 30,
-    marginTop: 20,
-    fontFamily: "Helvetica-BoldOblique",
-    shadowColor: "white",
-    shadowOffset: {
-      width: 5,
-      height: 3,
-    },
-    shadowOpacity: 0.8,
-    shadowRadius: 4.65,
-    elevation: 3,
   },
   SignUpText: {
     color: "white",
     fontFamily: "Helvetica-BoldOblique",
     // fontSize: 18,
-    fontSize: RFPercentage(3),
+    fontSize: RFPercentage(2.5),
     alignItems: "center",
     justifyContent: "center",
   },

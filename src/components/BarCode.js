@@ -1,16 +1,22 @@
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, Dimensions } from "react-native";
 import React, { useState, useEffect } from "react";
 import { BarCodeScanner } from "expo-barcode-scanner";
-import useAuth from "../useAuth";
 import { useRoute } from "@react-navigation/native";
+import useAuth from "../useAuth";
+// import { white } from "react-native-paper/lib/typescript/styles/colors";
 
+const { width } = Dimensions.get("window");
+const qrSize = width * 0.7;
 const opacity = "rgba(0, 0, 0, .6)";
+
 const BarCode = (props) => {
+  const param = useRoute();
   const [hasPermission, setHasPermission] = useState(false);
   const [scanData, setScanData] = useState();
   const { Create } = useAuth();
-  const param = useRoute();
-
+  const navigate = () => {
+    props.navigation.pop();
+  };
   useEffect(() => {
     (async () => {
       const { status } = await BarCodeScanner.requestPermissionsAsync();
@@ -18,19 +24,19 @@ const BarCode = (props) => {
     })();
   }, []);
 
-  const navigate = () => {
-    // setTimeout(() => {
-    // param.params.setIsBarcodeScanned(true);
-    // }, 1800);
-    props.navigation.pop();
-  };
-
   const handleBarCodeScanner = ({ data }) => {
     setScanData(data);
     const scannedData = JSON.parse(data);
-
     Create(scannedData);
     navigate();
+  };
+
+  const isDataExist = (data) => {
+    const size = props.route.params.barCodeData?.filter((obj) => {
+      return obj["Company"] === data["Company"];
+    }).length;
+
+    return size > 0;
   };
 
   if (!hasPermission) {

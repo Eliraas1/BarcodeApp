@@ -17,11 +17,11 @@ const Background = ({ children }) => {
 const styles = StyleSheet.create({
   linearGradient: {
     flex: 1,
-    width: "100%",
-    height: "100%",
-    paddingLeft: 15,
-    paddingRight: 15,
-    backgroundColor: "transparent",
+    // width: "100%",
+    // height: "100%",
+    // paddingLeft: 15,
+    // paddingRight: 15,
+    // backgroundColor: "transparent",
   },
 });
 export default Background;

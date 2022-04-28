@@ -5,80 +5,216 @@ import {
   TouchableOpacity,
   FlatList,
   SafeAreaView,
-  Button,
+  Animated,
+  Picker,
 } from "react-native";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState } from "react";
 import useAuth from "../useAuth";
-import Loading from "../Loading";
-// import AnimatedSplash from "react-native-animated-splash-screen";
-// import {} from "../../Firebase/firebase";
 import {
-  // widthPercentageToDP as wp,
+  ActivityIndicator,
+  Colors,
+  Button,
+  Paragraph,
+  Dialog,
+  Portal,
+  Provider,
+  Modal,
+  Title,
+  TextInput,
+} from "react-native-paper";
+import {
   heightPercentageToDP as hp,
+  widthPercentageToDP as wp,
 } from "react-native-responsive-screen";
-// import BarCode from "../components/BarCode";
-// import { AppBar, IconButton, FAB } from "@react-native-material/core";
-// import Icon from "@expo/vector-icons/MaterialCommunityIcons";
 import CompanyCard from "../components/CompanyCard";
 import Background from "../components/Background";
 import LottieView from "lottie-react-native";
+import DropdownPicker from "../components/DropdownPicker";
+// import CARD_HEIGHT from "../components/Card";
+const AnimatiedFlatList = Animated.createAnimatedComponent(FlatList);
 
 const Home = ({ navigation }) => {
   const {
     loading,
     logout,
-    Create,
     Read,
-    Delete,
     userData,
     isBarcodeScanned,
     setIsBarcodeScanned,
+    dataChanged,
+    logged,
+    transferPointsFromCompany,
+    Transfer,
   } = useAuth();
-  // const [isBarcodeScanned, setIsBarcodeScanned] = useState(false);
-
-  const animation = useRef(null);
-
-  useEffect(() => {
-    let timerid = null;
-    // console.log("\nasdasd\n");
-    if (isBarcodeScanned) {
-      animation.current.play(0, 18);
-      timerid = setTimeout(() => {
-        animation.current.play(18, 0);
-      }, 1500);
-      return () => {
-        clearTimeout(timerid);
-      };
-    }
-  }, [isBarcodeScanned]);
+  const [counter, setCounter] = useState(0);
+  const animation = React.useRef(null);
+  let initialScrollIndex = userData.length;
 
   const navigate = () => {
-    navigation.navigate("BarCode", {
-      setIsBarcodeScanned: setIsBarcodeScanned,
-    });
+    // console.log(auth);
+    navigation.navigate("BarCode", {});
+  };
+  const flatList = React.useRef(null);
+  const finishAnim = () => {
+    if (!loading) {
+      console.log(isBarcodeScanned);
+      flatList.current.scrollToEnd();
+
+      if (isBarcodeScanned) {
+        console.log("second");
+        animation.current.play(18, 0);
+      }
+      setIsBarcodeScanned(false);
+    }
   };
 
-  const renderCards = ({ item }) => {
-    return <CompanyCard data={{ item }} />;
+  React.useEffect(() => Read(), []);
+
+  // React.useEffect(() => {
+  //   Read();
+  // }, [dataChanged, logged]);
+
+  React.useEffect(() => {
+    if (isBarcodeScanned) {
+      animation.current.play(0, 18);
+      // animation.current.play(18, 0);
+      if (userData.length > 0) {
+        flatList.current?.scrollToIndex({
+          animated: true,
+          index: 0,
+        });
+      }
+    }
+    // }
+    setCounter(counter + 1);
+    console.log("counter : " + counter);
+  }, [isBarcodeScanned]);
+
+  const y = new Animated.Value(0);
+  const onScroll = Animated.event([{ nativeEvent: { contentOffset: { y } } }], {
+    useNativeDriver: true,
+  });
+
+  const renderItems = () => {
+    if (loading)
+      return (
+        <View style={styles.fetchingDataIndicator}>
+          <ActivityIndicator
+            style={styles.fetchingDataIndicator}
+            animating={true}
+            size={"large"}
+            color={Colors.red800}
+          />
+        </View>
+      );
+    else
+      return (
+        <AnimatiedFlatList
+          ref={flatList}
+          contentContainerStyle={{ justifyContent: "center" }}
+          bounces={false}
+          data={userData}
+          onContentSizeChange={() => {
+            flatList.current.scrollToEnd();
+          }}
+          renderItem={({ item, index }) => (
+            <CompanyCard data={{ item, index, y, setVisible }} />
+          )}
+          keyExtractor={(item) => item.Company}
+          {...{ onScroll }}
+          getItemLayout={(data, index) => ({
+            length: 288 + 70,
+            offset: 288 * index,
+            index,
+          })}
+        />
+      );
   };
 
-  const renderItems = () => (
-    <SafeAreaView
-      style={{
-        paddingHorizontal: 30,
-        flex: 1,
-        width: "100%",
-      }}
-    >
-      <FlatList
-        data={userData}
-        renderItem={renderCards}
-        keyExtractor={(item) => item.Company}
-      />
-    </SafeAreaView>
-  );
+  const [visible, setVisible] = useState(false);
+  const [transferPoints, setTransferPoints] = useState(0);
+  const [transferPointsToCompany, setTransferPointsToCompany] = useState();
 
-  if (loading) return <Loading />;
+  const showDialog = () => setVisible(true);
+  const hideDialog = () => setVisible(false);
+  const handleTransferChangeText = (val) => {
+    if (val > transferPointsFromCompany.Points) {
+      alert(
+        transferPointsFromCompany.Company +
+          " has only " +
+          transferPointsFromCompany.Points
+      );
+      setTransferPoints(transferPointsFromCompany.Points);
+    }
+    setTransferPoints(val);
+  };
+
+  const TransferPointsDialog = () =>
+    transferPointsFromCompany &&
+    visible && (
+      <Provider>
+        <Portal>
+          <Modal
+            style={styles.dialog}
+            visible={visible}
+            // onDismiss={hideDialog}
+            // contentContainerStyle={{ alignSelf: "center" }}
+          >
+            <View>
+              <Title>Transfer Points</Title>
+
+              <Paragraph>Transfer to:</Paragraph>
+
+              <DropdownPicker
+                data={userData
+                  .filter(
+                    (obj) => obj.Company != transferPointsFromCompany.Company
+                  )
+                  .map((obj) => {
+                    return (obj = { label: obj.Company, value: obj.Company });
+                  })}
+                setToCompany={setTransferPointsToCompany}
+              />
+
+              <TextInput
+                keyboardType="number-pad"
+                mode="outlined"
+                label="Points"
+                placeholder="0"
+                onChangeText={handleTransferChangeText}
+                right={
+                  <TextInput.Affix
+                    text={"/" + transferPointsFromCompany.Points}
+                  />
+                }
+              />
+              <View style={styles.txtContentContainer}>
+                <Button
+                  color="#5F9DA5"
+                  mode="contained"
+                  dark={true}
+                  onPress={hideDialog}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onPress={() => {
+                    Transfer(
+                      transferPointsToCompany,
+                      transferPointsFromCompany,
+                      transferPoints
+                    );
+                    setVisible(false);
+                  }}
+                >
+                  Accept
+                </Button>
+              </View>
+            </View>
+          </Modal>
+        </Portal>
+      </Provider>
+    );
 
   return (
     <Background>
@@ -95,29 +231,27 @@ const Home = ({ navigation }) => {
         <Text>Logout</Text>
       </TouchableOpacity>
       <Button title="Read" onPress={Read} />
-      {renderItems()}
+      <View style={styles.cardsContainer}>
+        <SafeAreaView style={styles.CardsView}>{renderItems()}</SafeAreaView>
+        {TransferPointsDialog()}
+      </View>
+
       <TouchableOpacity style={styles.plusLottie} onPress={() => navigate()}>
         <LottieView
+          style={{ flex: 1 }}
+          resizeMode="cover"
           ref={animation}
           source={require("../../assets/lottie/plus.json")}
           autoPlay={false}
           loop={false}
-          speed={0.4}
-          onAnimationFinish={() => setIsBarcodeScanned(false)}
+          speed={0.8}
+          onAnimationFinish={finishAnim}
         />
       </TouchableOpacity>
-      {/* <FAB
-        onPress={() => navigate()}
-        icon={(props) => <Icon name="plus" {...props} />}
-        // color="white"
-        style={{
-          // position: "absolute",
-          top: -28,
-          alignSelf: "center",
-        }}
-      /> */}
     </Background>
   );
+  {
+  }
 };
 
 export default Home;
@@ -126,11 +260,23 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  cardsContainer: {
+    flex: 1,
+    justifyContent: "flex-start",
+    // alignItems: "center",
+  },
+  CardsView: {
+    justifyContent: "flex-start",
+    height: "75%",
+    // flex: 2,
+  },
   plusLottie: {
-    width: hp("11.5%"),
-    height: hp("11.5%"),
+    width: hp("10.5%"),
+    height: hp("10.5%"),
     top: -28,
     alignSelf: "center",
+    alignItems: "center",
+    justifyContent: "center",
   },
   Navbar: {
     flexDirection: "row",
@@ -152,5 +298,33 @@ const styles = StyleSheet.create({
     height: "100%",
     borderBottomRightRadius: hp("2.5%"),
     fontSize: hp("5%"),
+  },
+  fetchingDataIndicator: {
+    // flex: 1,
+    // height: "200%",
+
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  dialog: {
+    // width: widthPercentageToDP("90%"),
+    // alignSelf: "center",
+    padding: "10%",
+    // alignItems: "center",
+    backgroundColor: "white",
+    // justifyContent: "flex-start",
+    justifyContent: "center",
+    borderRadius: 30,
+    // width: "80%",
+    // height: "90%",
+  },
+  txtContentContainer: {
+    height: "50%",
+    width: "50%",
+  },
+  selectBox: {
+    height: "15%",
+    width: "80%",
+    alignItems: "center",
   },
 });

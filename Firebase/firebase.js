@@ -20,6 +20,7 @@ import {
   collection,
   getDocs,
   deleteDoc,
+  updateDoc,
 } from "firebase/firestore";
 
 const firebaseConfig = {
@@ -62,4 +63,5 @@ export {
   getDocs,
   signInWithEmailAndPassword,
   deleteDoc,
+  updateDoc,
 };

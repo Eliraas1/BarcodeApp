@@ -7,6 +7,8 @@ import useAuth, { AuthProvider } from "./src/useAuth";
 import StackNavigator from "./src/StackNavigator";
 import AppLoading from "expo-app-loading";
 // import { useFonts } from "expo-font";
+import { YellowBox } from "react-native";
+import { I18nManager } from "react-native";
 LogBox.ignoreLogs([
   "Non-serializable values were found in the navigation state",
 ]);
@@ -14,6 +16,8 @@ LogBox.ignoreAllLogs(); //Ignore log notfication by message
 
 const Stack = createNativeStackNavigator();
 
+I18nManager.forceRTL(false);
+I18nManager.allowRTL(false);
 export default function App() {
   const [fontsLoaded] = useFonts({
     "Helvetica-Bold": require("./assets/fonts/Helvetica-Bold.ttf"),

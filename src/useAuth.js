@@ -1,4 +1,3 @@
-// import { View, Text } from "react-native";
 import React, { useState, useMemo } from "react";
 import { logInAsync } from "expo-google-app-auth";
 import {
@@ -15,9 +14,9 @@ import {
   getDocs,
   collection,
   deleteDoc,
+  updateDoc,
 } from "../Firebase/firebase";
 import { createContext, useContext, useEffect } from "react";
-import { where, query } from "firebase/firestore";
 // import AsyncStorage from "@react-native-async-storage/async-storage";
 const AuthContext = createContext({});
 
@@ -30,35 +29,59 @@ const config = {
   permissions: ["public_profile", "email", "gender", "location"],
 };
 
-let error;
-
 // export default signInWithGoogle;
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [loadingInitial, setLoadingInitial] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [Googleloading, setGoogleloading] = useState(false);
   const [error, setError] = useState("");
-  // console.log(user);
+  const [dataChanged, setDataChanged] = useState(false);
+  const [logged, setLogged] = useState(false);
+  const [transferPointsFromCompany, setTransferPointsFromCompany] =
+    useState(null);
+  const [userData, setuserData] = useState([]);
+  const [isBarcodeScanned, setIsBarcodeScanned] = useState(false);
 
   useEffect(
     () =>
       onAuthStateChanged(auth, (user) => {
         if (user) {
+          console.log("user setttt");
           setUser(user);
+          // Read();
         } else {
           setUser(null);
         }
-        setLoadingInitial(false);
       }),
     []
   );
 
-  const [userInputs, setUserInput] = useState();
-  const [userData, setuserData] = useState([]);
-  const [isBarcodeScanned, setIsBarcodeScanned] = useState(false);
+  const Update2 = (Company, newPoints, currentPoints) => {
+    const myDoc = doc(db, "users", user.uid, "companies", Company);
+    const updatedPoints = Number(newPoints) + Number(currentPoints);
+    updateDoc(myDoc, { Points: updatedPoints })
+      .then(() => {
+        userData.forEach((object) => {
+          if (object.Company === Company) {
+            object.Points = updatedPoints;
+            return;
+          }
+        });
+        setuserData(userData);
+      })
+      .catch((err) => {
+        console.log("err in update " + err);
+      })
+      .finally(() => {
+        setLoading(false);
+        setDataChanged(true);
+        setIsBarcodeScanned(true);
+      });
+  };
 
   const Create = (data) => {
+    setLoading(true);
     let obj = {
       Company: data.Company,
       Points: parseInt(data.Points),
@@ -68,53 +91,22 @@ export const AuthProvider = ({ children }) => {
     // else created new one in DB
     const checkData = isExist(obj);
     if (checkData.Company !== undefined) {
-      obj = {
-        ...obj,
-        Points: obj.Points + parseInt(checkData.Points),
-      };
-
-      userData.forEach((object) => {
-        if (object.Company === obj.Company)
-          object.Points += parseInt(obj.Points);
-      });
-      setuserData(userData);
-      console.log(userData);
+      Update2(obj.Company, obj.Points, checkData.Points);
+      return;
     }
+
     const myDoc = doc(db, "users", user.uid, "companies", data.Company);
-    setLoading(true);
     setDoc(myDoc, obj)
       .then(() => {
-        // arr.push(obj);
+        userData.push(obj);
+        setDataChanged(true);
+        setuserData(userData);
       })
       .catch(() => {
         alert("Error!!");
       })
       .finally(() => {
-        setLoading(false);
         setIsBarcodeScanned(true);
-      });
-  };
-
-  const Read = () => {
-    // setuserData(null);
-    while (userData.length > 0) userData.pop();
-
-    setuserData(userData);
-
-    setLoading(true);
-    const collect = collection(db, "users", user.uid, "companies");
-    getDocs(collect)
-      .then((doc) => {
-        doc.docs.map((doc) => {
-          userData.push(doc.data());
-          setuserData(userData);
-        });
-        // userData.forEach((data) => console.log(data));
-      })
-      .catch(() => {
-        console.log("ERRORRR READING DATA!");
-      })
-      .finally(() => {
         setLoading(false);
       });
   };
@@ -131,24 +123,85 @@ export const AuthProvider = ({ children }) => {
     return newObj;
   };
 
-  const Update = (merge) => {
-    const myDoc = doc(db, "users", user.uid, "companies", userInputs.Company);
-    setDoc(myDoc, userInputs, { merge: merge })
-      .then(() => {
-        alert("updated");
+  const Read = () => {
+    // setuserData(null);
+    while (userData.length > 0) userData.pop();
+
+    // setuserData(userData);
+    if (!loading) setLoading(true);
+    const collect = collection(db, "users", user.uid, "companies");
+    getDocs(collect)
+      .then((doc) => {
+        doc.docs.map((doc) => {
+          userData.push(doc.data());
+          // setuserData(userData);
+        });
+        // userData.forEach((data) => console.log(data));
       })
-      .catch((err) => {
-        alert("err");
+      .catch(() => {
+        console.log("ERRORRR READING DATA!");
+      })
+      .finally(() => {
+        setuserData(userData);
+        // console.log(userData.length);
+        // setDataChanged(false);
+        setLoading(false);
+        setLogged(false);
       });
   };
 
-  const Delete = () => {
-    deleteDoc(doc(db, "users", user.uid, "companies", userInputs.Company))
+  const getCompany = (company) => {
+    let Company = {};
+    userData.forEach((obj) => {
+      if (obj.Company === company) {
+        Company = obj;
+        return;
+      }
+    });
+    return Company;
+  };
+
+  const Transfer = async (ToCompany, FromCompany, Points) => {
+    setLoading(true);
+    const toCompany = getCompany(ToCompany);
+    console.log(toCompany);
+    const Doc1 = doc(db, "users", user.uid, "companies", toCompany.Company);
+    const Doc2 = doc(db, "users", user.uid, "companies", FromCompany.Company);
+    const toCompanyUpdatedPoints = Number(Points) + toCompany.Points;
+    const fromCompanyUpdatedPoints = FromCompany.Points - Number(Points);
+    await updateDoc(Doc1, { Points: toCompanyUpdatedPoints });
+    await updateDoc(Doc2, { Points: fromCompanyUpdatedPoints });
+    userData.forEach((object) => {
+      if (object.Company === toCompany.Company)
+        object.Points = toCompanyUpdatedPoints;
+
+      if (object.Company === FromCompany.Company)
+        object.Points = fromCompanyUpdatedPoints;
+    });
+    setuserData(userData);
+    setDataChanged(true);
+    setLoading(false);
+    setIsBarcodeScanned(true);
+  };
+
+  const Delete = (Company) => {
+    setLoading(true);
+    deleteDoc(doc(db, "users", user.uid, "companies", Company))
       .then(() => {
-        alert("deleted");
+        const filteredUserData = userData.filter(
+          (obj) => obj.Company != Company
+        );
+        setuserData(filteredUserData);
+        console.log("deleted" + Company + "\n");
+        console.log(filteredUserData);
       })
       .catch((err) => {
         alert(err);
+      })
+      .finally(() => {
+        setDataChanged(true);
+        setIsBarcodeScanned(true);
+        setLoading(false);
       });
   };
 
@@ -161,9 +214,13 @@ export const AuthProvider = ({ children }) => {
   };
 
   const signInWithGoogle = async () => {
+    // setLoading(true);
+    setGoogleloading(true);
     await logInAsync(config)
       .then(async (logInResult) => {
         if (logInResult.type === "success") {
+          setGoogleloading(false);
+          setLoading(true);
           const { idToken, accessToken } = logInResult;
           const credantial = GoogleAuthProvider.credential(
             idToken,
@@ -174,7 +231,12 @@ export const AuthProvider = ({ children }) => {
         } else return Promise.reject();
       })
       .catch((err) => {
-        error = err;
+        setError(err);
+        alert(err);
+      })
+      .finally(() => {
+        setLoading(false);
+        setLogged(true);
       });
   };
 
@@ -183,17 +245,33 @@ export const AuthProvider = ({ children }) => {
       user,
       loading,
       error,
+      Googleloading,
       signInWithGoogle,
       logout,
       Create,
       Read,
-      Update,
       Delete,
       userData,
       setIsBarcodeScanned,
       isBarcodeScanned,
+      dataChanged,
+      setDataChanged,
+      setLogged,
+      setTransferPointsFromCompany,
+      transferPointsFromCompany,
+      Transfer,
     }),
-    [user, loading, error, userData, isBarcodeScanned]
+    [
+      user,
+      loading,
+      error,
+      Googleloading,
+      isBarcodeScanned,
+      userData,
+      dataChanged,
+      logged,
+      transferPointsFromCompany,
+    ]
   );
 
   return (

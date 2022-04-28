@@ -19,8 +19,10 @@ import useAuth from "../useAuth";
 import { RFPercentage, RFValue } from "react-native-responsive-fontsize";
 import { SocialIcon } from "react-native-elements";
 import Loading from "../Loading";
+import { heightPercentageToDP } from "react-native-responsive-screen";
 const SignIn = ({ navigation }) => {
-  const { signInWithGoogle, loading } = useAuth();
+  const { signInWithGoogle, loading, Googleloading, setLoading, setLogged } =
+    useAuth();
   const [error, setError] = useState(" ");
   const [isError, setIsError] = useState(false);
   // const signInWithGoogle = () => {
@@ -32,6 +34,7 @@ const SignIn = ({ navigation }) => {
   };
 
   const HandleSignIn = (value) => {
+    setLoading(true);
     signInWithEmailAndPassword(auth, value.email, value.password)
       .then((res) => {
         console.log(`${value.email} is connected succsessfully!`);
@@ -44,6 +47,10 @@ const SignIn = ({ navigation }) => {
             setError("Email or Password Incorrect!");
             break;
         }
+      })
+      .finally(() => {
+        Read();
+        setLogged(true);
       });
   };
 
@@ -148,6 +155,7 @@ const SignIn = ({ navigation }) => {
                 type="google"
                 button
                 onPress={signInWithGoogle}
+                loading={Googleloading}
               />
             </View>
           </View>
@@ -174,18 +182,20 @@ const styles = StyleSheet.create({
     fontFamily: "Helvetica-BoldOblique",
   },
   linearGradient: {
-    flex: 1,
+    flex: 1.3,
+    // height: heightPercentageToDP("18%"),
     width: "100%",
-    // height: "100%",
+    justifyContent: "center",
+    alignItems: "center",
     paddingLeft: 15,
     paddingRight: 15,
     backgroundColor: "transparent",
   },
 
   TopView: {
-    flex: 1,
+    // flex: 3,
     width: "100%",
-    height: "120%",
+    height: "100%",
     // display: "flex",
     justifyContent: "center",
     alignItems: "center",
@@ -194,28 +204,27 @@ const styles = StyleSheet.create({
   DownButtonsView: {
     // flex: 3,
     width: "70%",
-    height: "41%",
+    // height: "41%",
+    height: heightPercentageToDP("22%"),
     // marginTop: 10,
     // flex: 1,
     // display: "flex",
     flexDirection: "row",
-    // alignItems: "center",
+    alignItems: "center",
     // alignContent: "center",
-    paddingBottom: 75,
-    // justifyContent: "space-between",
+    // marginBottom: 75,
+    justifyContent: "center",
     // backgroundColor: "white",
   },
   BottomView: {
     flex: 5,
     width: "100%",
-    height: "80%",
+    // height: "80%",
     backgroundColor: "rgb(36, 35, 34)",
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
     alignItems: "center",
-    alignContent: "flex-start",
-    // marginBottom: 50,
-    // display: "flex",
+    alignContent: "center",
     fontFamily: "Helvetica-BoldOblique",
   },
   tinyLogo: {
@@ -243,14 +252,7 @@ const styles = StyleSheet.create({
     // flex: 1,
     width: "76%",
     backgroundColor: "rgb(36, 35, 34)",
-    // shadowColor: "white",
-    // shadowOffset: {
-    //   width: 0,
-    //   height: 2,
-    // },
-    // shadowOpacity: 0.23,
-    // shadowRadius: 2.62,
-    // elevation: 4,
+
     borderColor: "white",
     borderRadius: 30,
     // borderWidth: 0.3,
@@ -266,19 +268,20 @@ const styles = StyleSheet.create({
   FormView: {
     // flex: 5,
     width: "100%",
-    height: "67%",
+    height: "60%",
     // minHeight: 85,
     // display: "flex",
     flexDirection: "column",
     alignItems: "center",
-    alignContent: "center",
-    marginTop: 10,
+    // justifyContent: "center",
+    // marginTop: 10,
     // fontFamily: "Helvetica-BoldOblique",
     // backgroundColor: "white",
   },
   Button: {
     // display: "flex",
-    height: "14%",
+    // height: "14%",
+    height: heightPercentageToDP("6%"),
     // flex: 2,
     width: "42%",
     color: "white",
@@ -314,26 +317,13 @@ const styles = StyleSheet.create({
     width: "49%",
     color: "white",
     // marginTop: 70,
-    // margin: 5,
-    alignItems: "center",
-    // justifyContent: "center",
     borderRadius: 30,
-    marginTop: 20,
-    fontFamily: "Helvetica-BoldOblique",
-    shadowColor: "white",
-    shadowOffset: {
-      width: 5,
-      height: 3,
-    },
-    shadowOpacity: 0.8,
-    shadowRadius: 4.65,
-    elevation: 3,
   },
   SignUpText: {
     color: "white",
     fontFamily: "Helvetica-BoldOblique",
     // fontSize: 18,
-    fontSize: RFPercentage(3),
+    fontSize: RFPercentage(2.5),
     alignItems: "center",
     justifyContent: "center",
   },

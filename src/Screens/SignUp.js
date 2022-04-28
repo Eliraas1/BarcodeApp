@@ -14,13 +14,17 @@ import {
 } from "react-native";
 // import SignUp from "./SignUp";
 import { LinearGradient } from "expo-linear-gradient";
-import Icon from "react-native-vector-icons/Ionicons";
+import Icon from "react-native-vector-icons/FontAwesome";
 // import Icon as FIcon from "react-native-vector-icons/FontAwesome";
 import { Formik } from "formik";
 import schema from "../Schemes/UserScheme";
 import { auth, createUserWithEmailAndPassword } from "../../Firebase/firebase";
 // import { createUserWithEmailAndPassword } from "firebase/auth";
 import ValidErrors from "../ValidErrors";
+import {
+  heightPercentageToDP,
+  widthPercentageToDP,
+} from "react-native-responsive-screen";
 
 const SignUp = ({ navigation }) => {
   const [email, setEmail] = useState(" ");
@@ -65,16 +69,16 @@ const SignUp = ({ navigation }) => {
       <StatusBar />
       <View style={styles.mainView}>
         <View style={styles.TopView}>
-          <Image
-            style={styles.tinyLogo}
-            source={require("../../assets/MomentLogo.png")}
-          />
           <Icon
-            name="arrow-back-circle-outline"
-            size={45}
+            name="angle-left"
+            size={32}
             color={"white"}
             style={styles.backIcon}
             onPress={navigate}
+          />
+          <Image
+            style={styles.tinyLogo}
+            source={require("../../assets/MomentLogo.png")}
           />
         </View>
 
@@ -205,18 +209,35 @@ const styles = StyleSheet.create({
   TopView: {
     width: "100%",
     height: "15%",
-    // display: "flex",
     flex: 1,
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    // marginBottom: 40,
-    // padding: 5,
-    // backgroundColor: "#6a3dff69",
-    // background: rgb(2, 0, 36),
+    flexDirection: "column",
+    // justifyContent: "center",
+    // alignItems: "center",
+    // alignContent: "center",
+  },
+  backIcon: {
+    alignSelf: "flex-start",
+    // height: "10%",
+    // marginRight: 32,
+    // marginTop: 5,
+    marginLeft: widthPercentageToDP("2%"),
+    // marginLeft: "auto",
+  },
+  tinyLogo: {
+    alignSelf: "center",
+    // justifyContent: "flex-start",
+    // marginLeft: "auto",
+    // marginBottom: 50,
+    // marginRight: widthPercentageToDP("22%"),
+    width: "50%",
+    resizeMode: "contain",
+    height: "100%",
+    // marginTop: 60,
+    // marginBottom: 65,
+    // marginLeft: 65,
   },
   BottomView: {
-    flex: 6,
+    flex: 8,
     alignItems: "center",
     width: "100%",
     height: "85%",
@@ -227,14 +248,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     // paddingBottom: 50,
   },
-  tinyLogo: {
-    width: "50%",
-    resizeMode: "contain",
-    height: "100%",
-    marginTop: 60,
-    marginBottom: 65,
-    marginLeft: 65,
-  },
+
   textStyle: {
     color: "white",
     fontSize: 30,
@@ -296,10 +310,7 @@ const styles = StyleSheet.create({
   //   color: "rgb(36, 35, 34)",
   //   fontWeight: "bold",
   // },
-  backIcon: {
-    marginLeft: 32,
-    marginTop: 5,
-  },
+
   errors: {
     fontSize: 12,
     color: "red",

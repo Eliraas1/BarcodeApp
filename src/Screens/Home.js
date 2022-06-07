@@ -6,10 +6,10 @@ import {
   FlatList,
   SafeAreaView,
   Animated,
+  Picker,
 } from "react-native";
 import React, { useState } from "react";
 import useAuth from "../useAuth";
-import Loading from "../Loading";
 import {
   ActivityIndicator,
   Colors,
@@ -20,18 +20,20 @@ import {
   Provider,
   Modal,
   Title,
+  TextInput,
 } from "react-native-paper";
 import {
-  // widthPercentageToDP as wp,
   heightPercentageToDP as hp,
-  widthPercentageToDP,
   widthPercentageToDP as wp,
 } from "react-native-responsive-screen";
-import BarCode from "../components/BarCode";
 import CompanyCard from "../components/CompanyCard";
 import Background from "../components/Background";
 import LottieView from "lottie-react-native";
-import CARD_HEIGHT from "../components/Card";
+import DropdownPicker from "../components/DropdownPicker";
+import { AppBar, HStack, IconButton } from "@react-native-material/core";
+import Icon from "@expo/vector-icons/MaterialCommunityIcons";
+import TotalPoints from "../components/TotalPoints";
+// import CARD_HEIGHT from "../components/Card";
 const AnimatiedFlatList = Animated.createAnimatedComponent(FlatList);
 
 const Home = ({ navigation }) => {
@@ -42,24 +44,18 @@ const Home = ({ navigation }) => {
     userData,
     isBarcodeScanned,
     setIsBarcodeScanned,
-    user,
     dataChanged,
-    setDataChanged,
     logged,
+    transferPointsFromCompany,
+    Transfer,
   } = useAuth();
-
-  //STATES FOR BARCODE
-  // const [isBarcodeScanned, setIsBarcodeScanned] = useState(false);
-  // const [barCodeData, setBarCodeData] = useState([]);
-
+  const [counter, setCounter] = useState(0);
   const animation = React.useRef(null);
   let initialScrollIndex = userData.length;
 
   const navigate = () => {
     // console.log(auth);
-    navigation.navigate("BarCode", {
-      setIsBarcodeScanned: setIsBarcodeScanned,
-    });
+    navigation.navigate("BarCode", {});
   };
   const flatList = React.useRef(null);
   const finishAnim = () => {
@@ -68,37 +64,34 @@ const Home = ({ navigation }) => {
       flatList.current.scrollToEnd();
 
       if (isBarcodeScanned) {
-        console.log("second");
         animation.current.play(18, 0);
       }
       setIsBarcodeScanned(false);
     }
   };
+
+  React.useEffect(() => Read(), []);
+
+  // React.useEffect(() => {
+  //   Read();
+  // }, [dataChanged, logged]);
+
   React.useEffect(() => {
-    console.log("READDDDDINNNGGGG");
-    Read();
-  }, [dataChanged, logged]);
-  React.useEffect(() => {
-    // if (!loading) {
-    // Read();
-    let timerid = null;
     if (isBarcodeScanned) {
       animation.current.play(0, 18);
+      // animation.current.play(18, 0);
       if (userData.length > 0) {
-        console.log(isBarcodeScanned);
-
-        flatList.current.scrollToIndex({
+        flatList.current?.scrollToIndex({
           animated: true,
           index: 0,
         });
       }
     }
     // }
-    console.log(userData.length);
+    setCounter(counter + 1);
+    console.log("counter : " + counter);
   }, [isBarcodeScanned]);
-  const renderCards = ({ item }) => {
-    return <CompanyCard data={{ item }} />;
-  };
+
   const y = new Animated.Value(0);
   const onScroll = Animated.event([{ nativeEvent: { contentOffset: { y } } }], {
     useNativeDriver: true,
@@ -121,12 +114,7 @@ const Home = ({ navigation }) => {
         <AnimatiedFlatList
           ref={flatList}
           contentContainerStyle={{ justifyContent: "center" }}
-          // scrollEventThrottle={5}
-          // horizontal
-          // inverted={true}
           bounces={false}
-          // initialScrollIndex={userData.length - 1}
-          // pagingEnabled={true}
           data={userData}
           onContentSizeChange={() => {
             flatList.current.scrollToEnd();
@@ -134,8 +122,7 @@ const Home = ({ navigation }) => {
           renderItem={({ item, index }) => (
             <CompanyCard data={{ item, index, y, setVisible }} />
           )}
-          keyExtractor={(item) => item.Company}
-          // key={{ index }}
+          keyExtractor={(item, index) => index}
           {...{ onScroll }}
           getItemLayout={(data, index) => ({
             length: 288 + 70,
@@ -147,49 +134,93 @@ const Home = ({ navigation }) => {
   };
 
   const [visible, setVisible] = useState(false);
+  const [transferPoints, setTransferPoints] = useState(0);
+  const [transferPointsToCompany, setTransferPointsToCompany] = useState();
+
   const showDialog = () => setVisible(true);
   const hideDialog = () => setVisible(false);
-  const TransferPointsDialog = () => (
-    <Provider>
-      <Portal>
-        <Modal
-          style={styles.dialog}
-          visible={visible}
-          onDismiss={hideDialog}
-          contentContainerStyle={{ alignSelf: "center" }}
-        >
-          <View>
-            <Title>Transfer Points</Title>
+  const handleTransferChangeText = (val) => {
+    if (val > transferPointsFromCompany.Points) {
+      alert(
+        transferPointsFromCompany.Company +
+          " has only " +
+          transferPointsFromCompany.Points
+      );
+      setTransferPoints(transferPointsFromCompany.Points);
+    }
+    setTransferPoints(val);
+  };
 
-            <Paragraph>Are You Sure You Want to Delete Card?</Paragraph>
+  const TransferPointsDialog = () =>
+    transferPointsFromCompany &&
+    visible && (
+      <Provider>
+        <Portal>
+          <Modal
+            style={styles.dialog}
+            visible={visible}
+            // onDismiss={hideDialog}
+            // contentContainerStyle={{ alignSelf: "center" }}
+          >
+            <View>
+              <Title>Transfer Points</Title>
 
-            <View style={styles.txtContentContainer}>
-              <Button
-                color="#5F9DA5"
-                mode="contained"
-                dark={true}
-                onPress={hideDialog}
-              >
-                No
-              </Button>
-              <Button
-                onPress={() => {
-                  // Delete(item.Company);
-                  setVisible(false);
-                }}
-              >
-                Yes
-              </Button>
+              <Paragraph>Transfer to:</Paragraph>
+
+              <DropdownPicker
+                data={userData
+                  .filter(
+                    (obj) => obj.Company != transferPointsFromCompany.Company
+                  )
+                  .map((obj) => {
+                    return (obj = { label: obj.Company, value: obj.Company });
+                  })}
+                setToCompany={setTransferPointsToCompany}
+              />
+
+              <TextInput
+                keyboardType="number-pad"
+                mode="outlined"
+                label="Points"
+                placeholder="0"
+                onChangeText={handleTransferChangeText}
+                right={
+                  <TextInput.Affix
+                    text={"/" + transferPointsFromCompany.Points}
+                  />
+                }
+              />
+              <View style={styles.txtContentContainer}>
+                <Button
+                  color="#5F9DA5"
+                  mode="contained"
+                  dark={true}
+                  onPress={hideDialog}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onPress={() => {
+                    Transfer(
+                      transferPointsToCompany,
+                      transferPointsFromCompany,
+                      transferPoints
+                    );
+                    setVisible(false);
+                  }}
+                >
+                  Accept
+                </Button>
+              </View>
             </View>
-          </View>
-        </Modal>
-      </Portal>
-    </Provider>
-  );
+          </Modal>
+        </Portal>
+      </Provider>
+    );
 
   return (
     <Background>
-      <TouchableOpacity
+      {/* <TouchableOpacity
         style={{
           width: "100%",
           height: "10%",
@@ -200,15 +231,35 @@ const Home = ({ navigation }) => {
         onPress={logout}
       >
         <Text>Logout</Text>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
       {/* <Button title="Read" onPress={Read} /> */}
+      <AppBar
+        title="Momentum"
+        // subtitle="App"
+        centerTitle={true}
+        leading={(props) => (
+          <IconButton
+            icon={(props) => <Icon name="menu" {...props} />}
+            {...props}
+          />
+        )}
+        trailing={(props) => (
+          <IconButton
+            icon={(props) => <Icon name="logout" {...props} />}
+            {...props}
+            onPress={logout}
+          />
+        )}
+      />
       <View style={styles.cardsContainer}>
         <SafeAreaView style={styles.CardsView}>{renderItems()}</SafeAreaView>
         {TransferPointsDialog()}
       </View>
 
+      <TotalPoints />
       <TouchableOpacity style={styles.plusLottie} onPress={() => navigate()}>
         <LottieView
+          // style={{ flex: 1 }}
           resizeMode="cover"
           ref={animation}
           source={require("../../assets/lottie/plus.json")}
@@ -221,16 +272,6 @@ const Home = ({ navigation }) => {
     </Background>
   );
   {
-    /* <Button title="logout" onPress={logout} />
-  <Button title="Create" onPress={Create} />
-  <Button title="Read" onPress={Read} />
-  <Button title="Delete" onPress={Delete} />
-  <Button
-    title="Update"
-    onPress={() => {
-      Update(true);
-    }}
-  /> */
   }
 };
 
@@ -241,22 +282,27 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   cardsContainer: {
-    flex: 1,
-    justifyContent: "flex-start",
+    flex: 6,
+    // justifyContent: "flex-start",
+    // backgroundColor: "red",
+    // height: "60%",
     // alignItems: "center",
   },
   CardsView: {
     justifyContent: "flex-start",
-    height: "75%",
-    // flex: 2,
+    // padding: 30,
+    flex: 1,
   },
   plusLottie: {
     width: hp("10.5%"),
     height: hp("10.5%"),
+
     top: -28,
+    // position: "absolute",
     alignSelf: "center",
-    alignItems: "center",
-    justifyContent: "center",
+    // alignItems: "center",
+    // justifyContent: "center",
+    // marginRight: "5%",
   },
   Navbar: {
     flexDirection: "row",
@@ -281,8 +327,8 @@ const styles = StyleSheet.create({
   },
   fetchingDataIndicator: {
     // flex: 1,
-    // height: "200%",
-
+    // height: "100%",
+    marginTop: 10,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -290,8 +336,21 @@ const styles = StyleSheet.create({
     // width: widthPercentageToDP("90%"),
     // alignSelf: "center",
     padding: "10%",
+    // alignItems: "center",
     backgroundColor: "white",
-    justifyContent: "flex-start",
+    // justifyContent: "flex-start",
+    justifyContent: "center",
     borderRadius: 30,
+    // width: "80%",
+    // height: "90%",
+  },
+  txtContentContainer: {
+    height: "50%",
+    width: "50%",
+  },
+  selectBox: {
+    height: "15%",
+    width: "80%",
+    alignItems: "center",
   },
 });

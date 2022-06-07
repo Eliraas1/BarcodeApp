@@ -19,11 +19,11 @@ export const CARD_WIDTH = width * 0.8;
 export const CARD_HEIGHT = CARD_WIDTH * ratio + 59;
 
 const Card = ({ data }) => {
-  const { Delete } = useAuth();
+  const { Delete, setTransferPointsFromCompany } = useAuth();
 
   const { item, setItemHeight, setVisible: setTransferVisible } = data;
   const onLayout = (e) => {
-    setItemHeight(e.nativeEvent.layout.height + 24 * 2);
+    setItemHeight(e.nativeEvent.layout.height + 24);
   };
   const RightContent = (props) => (
     <>
@@ -31,7 +31,10 @@ const Card = ({ data }) => {
       <IconButton
         {...props}
         icon="swap-horizontal-bold"
-        onPress={() => setTransferVisible(true)}
+        onPress={() => {
+          setTransferVisible(true);
+          setTransferPointsFromCompany(item);
+        }}
       />
     </>
   );
@@ -123,7 +126,7 @@ const Card = ({ data }) => {
         titleStyle={styles.title}
         subtitleStyle={styles.subtitle}
         title={item.Company}
-        subtitle={item.Points}
+        subtitle={"Points: " + item.Points}
         right={RightContent}
       />
       <CardView.Cover
@@ -138,7 +141,7 @@ const Card = ({ data }) => {
 };
 const styles = StyleSheet.create({
   Card: {
-    width: CARD_WIDTH,
+    width: CARD_WIDTH + 35,
     height: CARD_HEIGHT + 27,
     borderRadius: 30,
     borderBottomRightRadius: 30,

@@ -21,8 +21,14 @@ import { SocialIcon } from "react-native-elements";
 import Loading from "../Loading";
 import { heightPercentageToDP } from "react-native-responsive-screen";
 const SignIn = ({ navigation }) => {
-  const { signInWithGoogle, loading, Googleloading, setLoading, setLogged } =
-    useAuth();
+  const {
+    signInWithGoogle,
+    loading,
+    Googleloading,
+    setLoading,
+    setLogged,
+    Read,
+  } = useAuth();
   const [error, setError] = useState(" ");
   const [isError, setIsError] = useState(false);
   // const signInWithGoogle = () => {
@@ -38,6 +44,7 @@ const SignIn = ({ navigation }) => {
     signInWithEmailAndPassword(auth, value.email, value.password)
       .then((res) => {
         console.log(`${value.email} is connected succsessfully!`);
+        setLoading(false);
       })
       .catch((err) => {
         console.log(err);
@@ -49,7 +56,6 @@ const SignIn = ({ navigation }) => {
         }
       })
       .finally(() => {
-        Read();
         setLogged(true);
       });
   };

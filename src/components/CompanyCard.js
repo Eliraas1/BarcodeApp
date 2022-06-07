@@ -17,14 +17,14 @@ const { width } = Dimensions.get("window");
 const height = wHeight - 64;
 // export const HEIGHT =
 const CompanyCard = ({ data }) => {
-  const { item, index, y, setVisible } = data;
+  const { item, index, y, setVisible, setTransferPointsFromToCompany } = data;
   // console.log(CARD_HEIGHT);
 
   const [itemHeight, setItemHeight] = useState(0);
   // console.log(itemHeight);
 
   const position = Animated.subtract(index * itemHeight, y);
-  const isDisappearing = -itemHeight - 40;
+  const isDisappearing = -itemHeight;
   const isTop = 0;
   const isBottom = height - itemHeight;
   const isAppearing = height;
@@ -67,7 +67,13 @@ const CompanyCard = ({ data }) => {
       ]}
       key={index}
     >
-      <Card data={{ item, setItemHeight, setVisible }} />
+      <Card
+        data={{
+          item,
+          setItemHeight,
+          setVisible,
+        }}
+      />
     </Animated.View>
   );
 };
@@ -79,6 +85,7 @@ const styles = StyleSheet.create({
     // marginRight: 20,
     // height: "50%",
     marginVertical: MARGIN,
+    // margin: "10%",
     alignSelf: "center",
   },
 });

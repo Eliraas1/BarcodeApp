@@ -33,12 +33,16 @@ const config = {
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [loadingInitial, setLoadingInitial] = useState(true);
   const [loading, setLoading] = useState(false);
   const [Googleloading, setGoogleloading] = useState(false);
   const [error, setError] = useState("");
   const [dataChanged, setDataChanged] = useState(false);
   const [logged, setLogged] = useState(false);
+  const [transferPointsFromCompany, setTransferPointsFromCompany] =
+    useState(null);
+  const [userData, setuserData] = useState([]);
+  const [isBarcodeScanned, setIsBarcodeScanned] = useState(false);
+  const [totalPoints, setTotalPoints] = useState(0);
 
   useEffect(
     () =>
@@ -50,15 +54,10 @@ export const AuthProvider = ({ children }) => {
         } else {
           setUser(null);
         }
-        setLoadingInitial(false);
       }),
     []
   );
 
-  // const { uid } = user;
-  const [userInputs, setUserInput] = useState();
-  const [userData, setuserData] = useState([]);
-  const [isBarcodeScanned, setIsBarcodeScanned] = useState(false);
   const Update2 = (Company, newPoints, currentPoints) => {
     const myDoc = doc(db, "users", user.uid, "companies", Company);
     const updatedPoints = Number(newPoints) + Number(currentPoints);
@@ -76,7 +75,8 @@ export const AuthProvider = ({ children }) => {
         console.log("err in update " + err);
       })
       .finally(() => {
-        // setLoading(false);
+        updateTotalPoints();
+        setLoading(false);
         setDataChanged(true);
         setIsBarcodeScanned(true);
       });
@@ -96,6 +96,7 @@ export const AuthProvider = ({ children }) => {
       Update2(obj.Company, obj.Points, checkData.Points);
       return;
     }
+
     const myDoc = doc(db, "users", user.uid, "companies", data.Company);
     setDoc(myDoc, obj)
       .then(() => {
@@ -107,7 +108,9 @@ export const AuthProvider = ({ children }) => {
         alert("Error!!");
       })
       .finally(() => {
+        updateTotalPoints();
         setIsBarcodeScanned(true);
+        setLoading(false);
       });
   };
 
@@ -127,8 +130,11 @@ export const AuthProvider = ({ children }) => {
     // setuserData(null);
     while (userData.length > 0) userData.pop();
 
-    setuserData(userData);
-    if (!loading) setLoading(true);
+    // setuserData(userData);
+    // console.log(loading);
+
+    // if (!loading) setLoading(true);
+    setLoading(true);
     const collect = collection(db, "users", user.uid, "companies");
     getDocs(collect)
       .then((doc) => {
@@ -144,32 +150,66 @@ export const AuthProvider = ({ children }) => {
       .finally(() => {
         setuserData(userData);
         // console.log(userData.length);
-        setDataChanged(false);
+        // setDataChanged(false);
+        updateTotalPoints();
         setLoading(false);
         setLogged(false);
       });
   };
 
-  const Update = (merge) => {
-    const myDoc = doc(db, "users", user.uid, "companies", userInputs.Company);
-    setDoc(myDoc, userInputs, { merge: merge })
-      .then(() => {
-        alert("updated");
-      })
-      .catch((err) => {
-        alert("err");
-      });
+  const getCompany = (company) => {
+    let Company = {};
+    userData.forEach((obj) => {
+      if (obj.Company === company) {
+        Company = obj;
+        return;
+      }
+    });
+    return Company;
+  };
+
+  const updateTotalPoints = (data = userData) => {
+    console.log("\n\n\nupdated\n\n\n");
+    setTotalPoints(0);
+    data.forEach((element) => {
+      setTotalPoints((prev) => (prev += element.Points));
+    });
+  };
+
+  const Transfer = async (ToCompany, FromCompany, Points) => {
+    setLoading(true);
+    const toCompany = getCompany(ToCompany);
+    console.log(toCompany);
+    const Doc1 = doc(db, "users", user.uid, "companies", toCompany.Company);
+    const Doc2 = doc(db, "users", user.uid, "companies", FromCompany.Company);
+    const toCompanyUpdatedPoints = Number(Points) + toCompany.Points;
+    const fromCompanyUpdatedPoints = FromCompany.Points - Number(Points);
+    await updateDoc(Doc1, { Points: toCompanyUpdatedPoints });
+    await updateDoc(Doc2, { Points: fromCompanyUpdatedPoints });
+    userData.forEach((object) => {
+      if (object.Company === toCompany.Company)
+        object.Points = toCompanyUpdatedPoints;
+
+      if (object.Company === FromCompany.Company)
+        object.Points = fromCompanyUpdatedPoints;
+    });
+    setuserData(userData);
+    setDataChanged(true);
+    setLoading(false);
+    setIsBarcodeScanned(true);
   };
 
   const Delete = (Company) => {
     setLoading(true);
     deleteDoc(doc(db, "users", user.uid, "companies", Company))
       .then(() => {
-        const filteredUserData = userData.filter((obj) => {
-          obj.Company != Company;
-        });
+        const filteredUserData = userData.filter(
+          (obj) => obj.Company != Company
+        );
         setuserData(filteredUserData);
         console.log("deleted" + Company + "\n");
+        console.log(filteredUserData);
+        updateTotalPoints(filteredUserData);
       })
       .catch((err) => {
         alert(err);
@@ -177,6 +217,7 @@ export const AuthProvider = ({ children }) => {
       .finally(() => {
         setDataChanged(true);
         setIsBarcodeScanned(true);
+        setLoading(false);
       });
   };
 
@@ -206,7 +247,8 @@ export const AuthProvider = ({ children }) => {
         } else return Promise.reject();
       })
       .catch((err) => {
-        error = err;
+        setError(err);
+        alert(err);
       })
       .finally(() => {
         setLoading(false);
@@ -224,7 +266,6 @@ export const AuthProvider = ({ children }) => {
       logout,
       Create,
       Read,
-      Update,
       Delete,
       userData,
       setIsBarcodeScanned,
@@ -232,6 +273,11 @@ export const AuthProvider = ({ children }) => {
       dataChanged,
       setDataChanged,
       setLogged,
+      setLoading,
+      setTransferPointsFromCompany,
+      transferPointsFromCompany,
+      Transfer,
+      totalPoints,
     }),
     [
       user,
@@ -242,6 +288,7 @@ export const AuthProvider = ({ children }) => {
       userData,
       dataChanged,
       logged,
+      transferPointsFromCompany,
     ]
   );
 

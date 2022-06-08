@@ -33,9 +33,9 @@ Display card with company logo and name
 
 <p align="center">
     <h3>Fox-Home</h3>
-  <img src=./Barcodes/Fox-Home.png width="200" title="barcode">
+  <img src=./Barcodes/Fox-Home.jpg width="200" title="barcode">
     <h3>Hugo Boss</h3>
-  <img src=./Barcodes/Hugo.png width="200" title="barcode">
+  <img src=./Barcodes/Hugo.jpg width="200" title="barcode">
     <h3>Diesel</h3>
-  <img src=./Barcodes/Diesel.png width="200" title="barcode">
+  <img src=./Barcodes/Diesel.jpg width="200" title="barcode">
 </p>

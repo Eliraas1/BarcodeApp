@@ -30,6 +30,9 @@ import CompanyCard from "../components/CompanyCard";
 import Background from "../components/Background";
 import LottieView from "lottie-react-native";
 import DropdownPicker from "../components/DropdownPicker";
+import { AppBar, HStack, IconButton } from "@react-native-material/core";
+import Icon from "@expo/vector-icons/MaterialCommunityIcons";
+import TotalPoints from "../components/TotalPoints";
 // import CARD_HEIGHT from "../components/Card";
 const AnimatiedFlatList = Animated.createAnimatedComponent(FlatList);
 
@@ -61,7 +64,6 @@ const Home = ({ navigation }) => {
       flatList.current.scrollToEnd();
 
       if (isBarcodeScanned) {
-        console.log("second");
         animation.current.play(18, 0);
       }
       setIsBarcodeScanned(false);
@@ -120,7 +122,7 @@ const Home = ({ navigation }) => {
           renderItem={({ item, index }) => (
             <CompanyCard data={{ item, index, y, setVisible }} />
           )}
-          keyExtractor={(item) => item.Company}
+          keyExtractor={(item, index) => index}
           {...{ onScroll }}
           getItemLayout={(data, index) => ({
             length: 288 + 70,
@@ -218,7 +220,7 @@ const Home = ({ navigation }) => {
 
   return (
     <Background>
-      <TouchableOpacity
+      {/* <TouchableOpacity
         style={{
           width: "100%",
           height: "10%",
@@ -229,16 +231,35 @@ const Home = ({ navigation }) => {
         onPress={logout}
       >
         <Text>Logout</Text>
-      </TouchableOpacity>
-      <Button title="Read" onPress={Read} />
+      </TouchableOpacity> */}
+      {/* <Button title="Read" onPress={Read} /> */}
+      <AppBar
+        title="Momentum"
+        // subtitle="App"
+        centerTitle={true}
+        leading={(props) => (
+          <IconButton
+            icon={(props) => <Icon name="menu" {...props} />}
+            {...props}
+          />
+        )}
+        trailing={(props) => (
+          <IconButton
+            icon={(props) => <Icon name="logout" {...props} />}
+            {...props}
+            onPress={logout}
+          />
+        )}
+      />
       <View style={styles.cardsContainer}>
         <SafeAreaView style={styles.CardsView}>{renderItems()}</SafeAreaView>
         {TransferPointsDialog()}
       </View>
 
+      <TotalPoints />
       <TouchableOpacity style={styles.plusLottie} onPress={() => navigate()}>
         <LottieView
-          style={{ flex: 1 }}
+          // style={{ flex: 1 }}
           resizeMode="cover"
           ref={animation}
           source={require("../../assets/lottie/plus.json")}
@@ -261,22 +282,27 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   cardsContainer: {
-    flex: 1,
-    justifyContent: "flex-start",
+    flex: 6,
+    // justifyContent: "flex-start",
+    // backgroundColor: "red",
+    // height: "60%",
     // alignItems: "center",
   },
   CardsView: {
     justifyContent: "flex-start",
-    height: "75%",
-    // flex: 2,
+    // padding: 30,
+    flex: 1,
   },
   plusLottie: {
     width: hp("10.5%"),
     height: hp("10.5%"),
+
     top: -28,
+    // position: "absolute",
     alignSelf: "center",
-    alignItems: "center",
-    justifyContent: "center",
+    // alignItems: "center",
+    // justifyContent: "center",
+    // marginRight: "5%",
   },
   Navbar: {
     flexDirection: "row",
@@ -301,8 +327,8 @@ const styles = StyleSheet.create({
   },
   fetchingDataIndicator: {
     // flex: 1,
-    // height: "200%",
-
+    // height: "100%",
+    marginTop: 10,
     alignItems: "center",
     justifyContent: "center",
   },

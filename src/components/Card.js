@@ -23,7 +23,7 @@ const Card = ({ data }) => {
 
   const { item, setItemHeight, setVisible: setTransferVisible } = data;
   const onLayout = (e) => {
-    setItemHeight(e.nativeEvent.layout.height + 24 * 2);
+    setItemHeight(e.nativeEvent.layout.height + 24);
   };
   const RightContent = (props) => (
     <>
@@ -126,7 +126,7 @@ const Card = ({ data }) => {
         titleStyle={styles.title}
         subtitleStyle={styles.subtitle}
         title={item.Company}
-        subtitle={item.Points}
+        subtitle={"Points: " + item.Points}
         right={RightContent}
       />
       <CardView.Cover
@@ -141,15 +141,19 @@ const Card = ({ data }) => {
 };
 const styles = StyleSheet.create({
   Card: {
-    width: CARD_WIDTH,
+    width: CARD_WIDTH + 35,
     height: CARD_HEIGHT + 27,
     borderRadius: 30,
     borderBottomRightRadius: 30,
     borderBottomLeftRadius: 30,
   },
   CardCover: {
+    // flex: 1,
     borderRadius: 30,
     borderBottomLeftRadius: 30,
+    // width: "90%",
+    // height: "100%",
+    resizeMode: "cover",
   },
   dialog: {
     borderRadius: 30,

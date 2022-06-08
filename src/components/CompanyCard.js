@@ -24,7 +24,7 @@ const CompanyCard = ({ data }) => {
   // console.log(itemHeight);
 
   const position = Animated.subtract(index * itemHeight, y);
-  const isDisappearing = -itemHeight - 40;
+  const isDisappearing = -itemHeight;
   const isTop = 0;
   const isBottom = height - itemHeight;
   const isAppearing = height;
@@ -85,6 +85,7 @@ const styles = StyleSheet.create({
     // marginRight: 20,
     // height: "50%",
     marginVertical: MARGIN,
+    // margin: "10%",
     alignSelf: "center",
   },
 });

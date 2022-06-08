@@ -42,6 +42,7 @@ export const AuthProvider = ({ children }) => {
     useState(null);
   const [userData, setuserData] = useState([]);
   const [isBarcodeScanned, setIsBarcodeScanned] = useState(false);
+  const [totalPoints, setTotalPoints] = useState(0);
 
   useEffect(
     () =>
@@ -74,6 +75,7 @@ export const AuthProvider = ({ children }) => {
         console.log("err in update " + err);
       })
       .finally(() => {
+        updateTotalPoints();
         setLoading(false);
         setDataChanged(true);
         setIsBarcodeScanned(true);
@@ -106,6 +108,7 @@ export const AuthProvider = ({ children }) => {
         alert("Error!!");
       })
       .finally(() => {
+        updateTotalPoints();
         setIsBarcodeScanned(true);
         setLoading(false);
       });
@@ -128,7 +131,10 @@ export const AuthProvider = ({ children }) => {
     while (userData.length > 0) userData.pop();
 
     // setuserData(userData);
-    if (!loading) setLoading(true);
+    // console.log(loading);
+
+    // if (!loading) setLoading(true);
+    setLoading(true);
     const collect = collection(db, "users", user.uid, "companies");
     getDocs(collect)
       .then((doc) => {
@@ -145,6 +151,7 @@ export const AuthProvider = ({ children }) => {
         setuserData(userData);
         // console.log(userData.length);
         // setDataChanged(false);
+        updateTotalPoints();
         setLoading(false);
         setLogged(false);
       });
@@ -159,6 +166,14 @@ export const AuthProvider = ({ children }) => {
       }
     });
     return Company;
+  };
+
+  const updateTotalPoints = (data = userData) => {
+    console.log("\n\n\nupdated\n\n\n");
+    setTotalPoints(0);
+    data.forEach((element) => {
+      setTotalPoints((prev) => (prev += element.Points));
+    });
   };
 
   const Transfer = async (ToCompany, FromCompany, Points) => {
@@ -194,6 +209,7 @@ export const AuthProvider = ({ children }) => {
         setuserData(filteredUserData);
         console.log("deleted" + Company + "\n");
         console.log(filteredUserData);
+        updateTotalPoints(filteredUserData);
       })
       .catch((err) => {
         alert(err);
@@ -257,9 +273,11 @@ export const AuthProvider = ({ children }) => {
       dataChanged,
       setDataChanged,
       setLogged,
+      setLoading,
       setTransferPointsFromCompany,
       transferPointsFromCompany,
       Transfer,
+      totalPoints,
     }),
     [
       user,

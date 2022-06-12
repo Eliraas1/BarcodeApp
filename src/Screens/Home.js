@@ -136,7 +136,6 @@ const Home = ({ navigation }) => {
   const [visible, setVisible] = useState(false);
   const [transferPoints, setTransferPoints] = useState(0);
   const [transferPointsToCompany, setTransferPointsToCompany] = useState();
-
   const showDialog = () => setVisible(true);
   const hideDialog = () => setVisible(false);
   const handleTransferChangeText = (val) => {
@@ -163,10 +162,7 @@ const Home = ({ navigation }) => {
             // contentContainerStyle={{ alignSelf: "center" }}
           >
             <View>
-              <Title>Transfer Points</Title>
-
               <Paragraph>Transfer to:</Paragraph>
-
               <DropdownPicker
                 data={userData
                   .filter(
@@ -193,12 +189,14 @@ const Home = ({ navigation }) => {
               <View style={styles.txtContentContainer}>
                 <Button
                   color="#5F9DA5"
-                  mode="contained"
+                  // mode="contained"
+                  mode="outlined"
                   dark={true}
                   onPress={hideDialog}
                 >
                   Cancel
                 </Button>
+
                 <Button
                   onPress={() => {
                     Transfer(

@@ -2,15 +2,12 @@ import { View, Text, StyleSheet, Dimensions } from "react-native";
 import { React, useState } from "react";
 import {
   Card as CardView,
-  Avatar,
   IconButton,
   Button,
   Paragraph,
   Dialog,
   Portal,
   Provider,
-  Modal,
-  Title,
 } from "react-native-paper";
 import useAuth from "../useAuth";
 const { width } = Dimensions.get("window");

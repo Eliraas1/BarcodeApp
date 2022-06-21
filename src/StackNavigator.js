@@ -5,7 +5,7 @@ import SignUp from "./Screens/SignUp";
 import Home from "./Screens/Home";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import useAuth from "./useAuth";
-
+import BarCode from "./components/BarCode";
 const Stack = createNativeStackNavigator();
 
 const StackNavigator = () => {
@@ -13,7 +13,7 @@ const StackNavigator = () => {
   //   const user = false;
   return (
     <Stack.Navigator screenOptions={{ headerTransparent: false }}>
-      {user ? (
+      {!user ? (
         <>
           <Stack.Screen
             name="SignIn"
@@ -27,11 +27,18 @@ const StackNavigator = () => {
           />
         </>
       ) : (
-        <Stack.Screen
-          name="Home"
-          component={Home}
-          options={{ headerShown: false }}
-        />
+        <>
+          <Stack.Screen
+            name="Home"
+            component={Home}
+            options={{ headerShown: false }}
+          />
+          <Stack.Screen
+            name="BarCode"
+            component={BarCode}
+            options={{ headerShown: false }}
+          />
+        </>
       )}
     </Stack.Navigator>
   );

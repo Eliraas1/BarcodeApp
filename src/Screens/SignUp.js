@@ -3,22 +3,28 @@ import {
   Text,
   View,
   StyleSheet,
-  Button,
+  // Button,
   Image,
   TextInput,
   TouchableOpacity,
-  ScrollView,
-  Alert,
+  // ScrollView,
+  // Alert,
+  StatusBar,
+  KeyboardAvoidingView,
 } from "react-native";
 // import SignUp from "./SignUp";
 import { LinearGradient } from "expo-linear-gradient";
-import Icon from "react-native-vector-icons/Ionicons";
+import Icon from "react-native-vector-icons/FontAwesome";
 // import Icon as FIcon from "react-native-vector-icons/FontAwesome";
 import { Formik } from "formik";
 import schema from "../Schemes/UserScheme";
 import { auth, createUserWithEmailAndPassword } from "../../Firebase/firebase";
 // import { createUserWithEmailAndPassword } from "firebase/auth";
 import ValidErrors from "../ValidErrors";
+import {
+  heightPercentageToDP,
+  widthPercentageToDP,
+} from "react-native-responsive-screen";
 
 const SignUp = ({ navigation }) => {
   const [email, setEmail] = useState(" ");
@@ -28,14 +34,15 @@ const SignUp = ({ navigation }) => {
   const [isError, setIsError] = useState(false);
 
   const navigate = () => {
-    navigation.navigate("SignIn");
+    navigation.pop();
   };
 
   const handleSubmit1 = (values) => {
     createUserWithEmailAndPassword(auth, values.email, values.password)
       .then((res) => {
-        setisSignedIn(true);
-        navigate();
+        // setisSignedIn(true);
+        // console.log("first");
+        // navigate();
       })
       .catch((err) => {
         setIsError(true);
@@ -59,25 +66,28 @@ const SignUp = ({ navigation }) => {
       style={styles.linearGradient}
       locations={[0, 0.1, 1]}
     >
+      <StatusBar />
       <View style={styles.mainView}>
         <View style={styles.TopView}>
           <Icon
-            name="arrow-back-circle-outline"
-            size={45}
+            name="angle-left"
+            size={32}
             color={"white"}
             style={styles.backIcon}
             onPress={navigate}
           />
           <Image
             style={styles.tinyLogo}
-            source={{
-              uri: "https://www.momentumlabs.ai/wp-content/uploads/2021/07/logow.png",
-            }}
+            source={require("../../assets/MomentLogo.png")}
           />
         </View>
 
-        <View style={styles.BottomView}>
-          <Text style={styles.textStyle}>Create New Account!</Text>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
+          keyboardVerticalOffset={Platform.OS === "ios" ? 40 : 0}
+          style={styles.BottomView}
+        >
+          <Text style={styles.textStyle}>Join Us Now !</Text>
           <Formik
             initialValues={{ email: "", password: "", confirmpassword: "" }}
             validateOnMount={true}
@@ -157,13 +167,13 @@ const SignUp = ({ navigation }) => {
                     style={styles.GradBtn}
                     locations={[0.1, 0.5, 1]}
                   >
-                    <Text style={styles.btnText}>Sign Up!</Text>
+                    <Text style={styles.btnText}>Sign Up !</Text>
                   </LinearGradient>
                 </TouchableOpacity>
               </View>
             )}
           </Formik>
-        </View>
+        </KeyboardAvoidingView>
       </View>
     </LinearGradient>
   );
@@ -171,12 +181,13 @@ const SignUp = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   mainView: {
-    marginTop: 40,
+    marginTop: 35,
     flex: 1,
     flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
     // backgroundColor: "rgb(36, 35, 34)",
+    fontFamily: "Helvetica-BoldOblique",
   },
   linearGradient: {
     flex: 1,
@@ -198,30 +209,46 @@ const styles = StyleSheet.create({
   TopView: {
     width: "100%",
     height: "15%",
-    // display: "flex",
     flex: 1,
-    flexDirection: "row",
+    flexDirection: "column",
     // justifyContent: "center",
-    alignItems: "center",
-    // backgroundColor: "#6a3dff69",
-    // background: rgb(2, 0, 36),
+    // alignItems: "center",
+    // alignContent: "center",
+  },
+  backIcon: {
+    alignSelf: "flex-start",
+    // height: "10%",
+    // marginRight: 32,
+    // marginTop: 5,
+    marginLeft: widthPercentageToDP("2%"),
+    // marginLeft: "auto",
+  },
+  tinyLogo: {
+    alignSelf: "center",
+    // justifyContent: "flex-start",
+    // marginLeft: "auto",
+    // marginBottom: 50,
+    // marginRight: widthPercentageToDP("22%"),
+    width: "50%",
+    resizeMode: "contain",
+    height: "100%",
+    // marginTop: 60,
+    // marginBottom: 65,
+    // marginLeft: 65,
   },
   BottomView: {
+    flex: 8,
     alignItems: "center",
     width: "100%",
     height: "85%",
     // backgroundColor: "rgb(36, 35, 34)",
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
+    justifyContent: "center",
+    alignItems: "center",
+    // paddingBottom: 50,
   },
-  tinyLogo: {
-    width: "50%",
-    resizeMode: "contain",
-    height: "100%",
-    marginTop: 60,
-    marginBottom: 65,
-    marginLeft: "12%",
-  },
+
   textStyle: {
     color: "white",
     fontSize: 30,
@@ -233,13 +260,13 @@ const styles = StyleSheet.create({
     display: "flex",
   },
   TextInput: {
-    width: "80%",
+    width: "76%",
     borderColor: "white",
     alignItems: "center",
     justifyContent: "center",
     alignContent: "center",
     textAlign: "center",
-    borderWidth: 1,
+    borderBottomWidth: 0.3,
     height: "12%",
     borderRadius: 30,
     paddingHorizontal: 10,
@@ -257,7 +284,7 @@ const styles = StyleSheet.create({
   },
   Button: {
     height: "12%",
-    width: "80%",
+    width: "42%",
     color: "white",
     // backgroundColor: "rgb(58,40,142)",
     marginTop: 30,
@@ -283,10 +310,7 @@ const styles = StyleSheet.create({
   //   color: "rgb(36, 35, 34)",
   //   fontWeight: "bold",
   // },
-  backIcon: {
-    marginLeft: 10,
-    marginTop: 5,
-  },
+
   errors: {
     fontSize: 12,
     color: "red",
